@@ -1,0 +1,33 @@
+{
+  "originHash" : "997d61abb251bfdbb66f2aa3b01b3cac3503663ed6a56fa0d9a8b18f2c3a9592",
+  "pins" : [
+    {
+      "identity" : "swift-confidential",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/securevale/swift-confidential.git",
+      "state" : {
+        "revision" : "791e9d042db3ed4070c6a1ccfc44885990874751",
+        "version" : "0.5.2"
+      }
+    },
+    {
+      "identity" : "swift-confidential-plugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/securevale/swift-confidential-plugin.git",
+      "state" : {
+        "revision" : "32e74f2ad1f52b741d3336b186b30cab8ea23f13",
+        "version" : "0.5.2"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "9de99a78f099e59caf2b2beec65a4c45d54b2081",
+        "version" : "603.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}
