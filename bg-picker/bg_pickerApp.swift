@@ -11,7 +11,7 @@ import SwiftUI
 struct bg_pickerApp: App {
     var body: some Scene {
         WindowGroup {
-            SetNameScreen()
+            LauchScreen()
         }
     }
 }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct LobbyScreen: View {
     var body: some View {
-        
+        VStack {
+            Text("JSDljlajd")
+        }
     }
 }

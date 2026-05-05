@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct StarterScreen: View {
-    private let isFirstLaunch = UserManager.shared.isNameSet
+    private let isNameSet = UserManager.shared.isNameSet
     
     var body: some View {
-        if isFirstLaunch {
-            SetNameScreen()
-        } else {
-            
+        NavigationStack {
+            if !isNameSet {
+                SetNameScreen()
+            } else {
+                LobbyScreen()
+            }
         }
     }
 }
