@@ -14,6 +14,14 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world!")
+            Button("Font") {
+                for family: String in UIFont.familyNames {
+                    print(family)
+                    for names: String in UIFont.fontNames(forFamilyName: family) {
+                        print("== \(names)")
+                    }
+                }
+            }
         }
         .padding()
     }
