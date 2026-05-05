@@ -11,6 +11,10 @@ struct StarterScreen: View {
     private let isFirstLaunch = UserManager.shared.isNameSet
     
     var body: some View {
-        
+        if isFirstLaunch {
+            SetNameScreen()
+        } else {
+            
+        }
     }
 }

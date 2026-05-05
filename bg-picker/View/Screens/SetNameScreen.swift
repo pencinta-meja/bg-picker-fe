@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SetNameScreen: View {
+    @State var name: String = ""
+    
     var body: some View {
         ZStack {
             Image("BackgroundImage")
@@ -15,53 +17,38 @@ struct SetNameScreen: View {
                 .scaledToFill()
                 .ignoresSafeArea()
             
-            VStack (spacing: 100) {
+            VStack(spacing: 0) {
                 Spacer()
-                Text("Who is this?")
-                    .foregroundStyle(.white).font(Font.title)
-                HStack(alignment: .center, spacing: 4) {
-                    TextField("Plain", text: .constant("Halo"))
-                        .font(
-                            .headline
-                        )
+                VStack(spacing: 100) {
+                    Text("Who is this?")
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 106.5)
-                        .padding(.vertical, 14)
+                        .font(Font.title)
+                    
+                    HStack(alignment: .center, spacing: 4) {
+                        TextField("Plain", text: $name)
+                            .font(.headline)
+                            .tint(.white)
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.vertical, 14)
+                            .onChange(of: name) { _, newValue in
+                                if newValue.count > 20 {
+                                    name = String(newValue.prefix(20))
+                                }
+                            }
+                    }
+                    .glassEffect(.clear, in: .rect(cornerRadius: 10))
+                    .padding(.horizontal, 52)
+                    .padding(.vertical, 6)
                 }
-                .glassEffect(.clear, in: .rect(cornerRadius: 10))   
-                .padding(.horizontal, 52)
-                .padding(.vertical, 6)
                 
                 Spacer()
-                NextButton(action: {
-                    print("Halo")
-                })
-                .padding(
-                    .bottom, 88
-                ).padding(
-                    .horizontal, 52
-                )
+                
+                PrimaryButton(action: {})
+                    .padding(.bottom, 88)
+                    .padding(.horizontal, 52)
             }
-        }
-        
-    }
-}
-
-struct NextButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text("Next")
-                .font(.headline)
-                .fontWeight(.bold)
-                .foregroundColor(.black.opacity(0.8))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(Color("PrimaryButton"))
-                .clipShape(Capsule())
-        }
+        }.ignoresSafeArea(.container)
     }
 }
 
