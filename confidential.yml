@@ -1,0 +1,20 @@
+algorithm:
+  - encrypt using aes-256-gcm
+  - shuffle
+
+defaultNamespace: create ObfuscatedSecrets
+
+secrets:
+  - name: apiKey
+    value: "API_KEY_HERE"
+    algorithm: random
+
+  - name: baseURL
+    value: "https://tba.com"
+    algorithm: random
+
+# import SwiftConfidential
+#
+# // Auto-generated from your YAML
+# let key: String = ObfuscatedSecrets.apiKey
+# let url: String = ObfuscatedSecrets.baseURL

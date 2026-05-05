@@ -22,6 +22,7 @@ struct ContentView: View {
                     }
                 }
             }
+//            Text(key + " " + url)
         }
         .padding()
     }
