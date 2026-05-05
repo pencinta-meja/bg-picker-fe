@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-struct PrimaryButton: View {
+struct NextPrimaryButton: View {
     let action: () -> Void
 
     var body: some View {
