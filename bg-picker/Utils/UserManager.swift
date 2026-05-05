@@ -7,9 +7,9 @@
 
 import Foundation
 
-final class UserInfo {
+final class UserManager {
     
-    static let shared = UserInfo()
+    static let shared = UserManager()
     private init() {}
     
     private let defaults = UserDefaults.standard
@@ -28,6 +28,11 @@ final class UserInfo {
     var id: String? {
         get { defaults.string(forKey: Keys.id) ?? nil }
         set { defaults.set(newValue, forKey: Keys.id) }
+    }
+    
+    var isNameSet: Bool {
+        get { defaults.bool(forKey: Keys.isNameSet) }
+        set { defaults.set(newValue, forKey: Keys.isNameSet)}
     }
     
     func saveName(name: String) {
