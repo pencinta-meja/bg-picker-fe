@@ -16,10 +16,6 @@ struct LoadingScreen: View {
 
     var body: some View {
         ZStack (alignment: .top){
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
             VStack(alignment: .center, spacing: 112){
                 
                 Text("Abraar's Room")
@@ -45,8 +41,6 @@ struct LoadingScreen: View {
             .frame(width: .infinity, height: .infinity
                    , alignment: .bottom)
         }
-        
-        
         .onReceive(timer) { _ in
             dotCount = (dotCount + 1) % 4
 
