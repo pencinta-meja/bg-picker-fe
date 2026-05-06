@@ -7,20 +7,8 @@
 import SwiftUI
 
 struct CardView: View {
-    enum SwipeDirection {
-        case left, right, none
-    }
+    var model: BoardGameCard
     
-    //Pisah karna model
-    struct Model: Identifiable, Equatable {
-        let id = UUID()
-        let title: String
-        let description: String
-        let imageURL: URL?
-        var swipeDirection: SwipeDirection = .none
-    }
-
-    var model: Model
     var cardWidth: CGFloat
     var cardHeight: CGFloat
     var dragOffset: CGSize
@@ -59,8 +47,7 @@ struct CardView: View {
 
             ZStack(alignment: .bottomLeading) {
                 cardImage
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .scaledToFit()
+                    .frame(width: width - 20, height: height - 20)
                     .clipped()
 
                 LinearGradient(
@@ -71,7 +58,7 @@ struct CardView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(model.title)
-                        .font(.system(size: 34, weight: .black, design: .rounded))
+                        .font(.custom("Impact", size: 30))
                         .foregroundStyle(.white)
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
@@ -79,7 +66,7 @@ struct CardView: View {
                         .frame(maxWidth: .infinity)
 
                     Text(model.description)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .font(.system(size: 15, weight: .regular))
                         .foregroundStyle(.white.opacity(0.92))
                         .lineLimit(4)
                         .multilineTextAlignment(.center)
@@ -128,24 +115,98 @@ struct CardView: View {
 
     @ViewBuilder
     private var cardImage: some View {
-        if let imageURL = model.imageURL {
-            AsyncImage(url: imageURL) { phase in
+        remoteImage(url: model.thumbnailURL)
+    }
+
+    private var detailSheet: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    remoteImage(url: model.gameplayImageURL ?? model.thumbnailURL)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: geometry.size.height * 0.4)
+                        .overlay(alignment: .bottom) {
+                            LinearGradient(
+                                colors: [
+                                    .clear,
+                                    Color(red: 22/255, green: 5/255, blue: 36/255)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: geometry.size.height * 0.16)
+                        }
+                        .clipped()
+
+                    VStack(alignment: .leading, spacing: 24) {
+                        HStack(alignment: .top, spacing: 16) {
+                            remoteImage(url: model.thumbnailURL)
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(model.title)
+                                    .font(.custom("Impact", size: 30))
+                                    .foregroundStyle(.white)
+
+                                Text(model.categoriesText)
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundStyle(.white.opacity(0.72))
+                            }
+                        }
+
+                        LazyVGrid(columns: [
+                            GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16),
+                            GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
+                        ], spacing: 16) {
+                            statCard(icon: "clock", label: "Play Time", value: model.playTimeText)
+                            statCard(icon: "person.2", label: "Players", value: model.playersText)
+                            statCard(icon: "dial.medium", label: "Complexity", value: model.complexityText)
+                            statCard(icon: "star", label: "BGG Rating", value: model.ratingText)
+                        }
+                        .frame(maxWidth: .infinity)
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("About")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundStyle(.white)
+
+                            Text(model.description)
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundStyle(.white.opacity(0.9))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(width: geometry.size.width, alignment: .topLeading)
+            }
+        }
+        .scrollIndicators(.hidden)
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(Color(red: 22/255, green: 5/255, blue: 36/255))
+    }
+
+    @ViewBuilder
+    private func remoteImage(url: URL?) -> some View {
+        if let url {
+            AsyncImage(url: url) { phase in
                 switch phase {
                 case .success(let image):
                     image
                         .resizable()
                         .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
                         .accessibilityLabel(model.title)
                 case .failure:
                     placeholderCard(systemImage: "photo")
                 case .empty:
                     ZStack {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Color(.systemGray6))
+                        Rectangle()
+                            .fill(Color.white.opacity(0.08))
                         ProgressView()
-                            .tint(.gray)
+                            .tint(.white.opacity(0.8))
                     }
                 @unknown default:
                     placeholderCard(systemImage: "photo")
@@ -156,24 +217,32 @@ struct CardView: View {
         }
     }
 
-    private var detailSheet: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                cardImage
-                    .frame(height: 320)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    private func statCard(icon: String, label: String, value: String) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 20, height: 20, alignment: .center)
 
-                Text(model.title)
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label.uppercased())
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
 
-                Text(model.description)
-                    .font(.system(size: 17, weight: .regular, design: .rounded))
-                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
             }
-            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var stackOffset: CGFloat {
@@ -232,9 +301,4 @@ struct CardView: View {
             return Color.black.opacity(0.18)
         }
     }
-}
-
-
-#Preview {
-    ContentView()
 }

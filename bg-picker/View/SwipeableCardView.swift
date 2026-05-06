@@ -9,14 +9,12 @@ import SwiftUI
 import Combine
 
 struct SwipeableCardsView: View {
-    
-    //Pisah karna model
     class Model: ObservableObject {
-        private var originalCards: [CardView.Model]
-        @Published var unswipedCards: [CardView.Model]
-        @Published var swipedCards: [CardView.Model]
+        private var originalCards: [BoardGameCard]
+        @Published var unswipedCards: [BoardGameCard]
+        @Published var swipedCards: [BoardGameCard]
         
-        init(cards: [CardView.Model]) {
+        init(cards: [BoardGameCard]) {
             self.originalCards = cards
             self.unswipedCards = cards.shuffled()
             self.swipedCards = []
@@ -30,7 +28,7 @@ struct SwipeableCardsView: View {
             }
         }
         
-        func updateTopCardSwipeDirection(_ direction: CardView.SwipeDirection) {
+        func updateTopCardSwipeDirection(_ direction: BoardGameCard.SwipeDirection) {
             if !unswipedCards.isEmpty {
                 unswipedCards[0].swipeDirection = direction
             }
@@ -41,7 +39,7 @@ struct SwipeableCardsView: View {
             swipedCards = []
         }
     }
-    
+
     @ObservedObject var model: Model
     @State private var dragState = CGSize.zero
     @State private var cardRotation: Double = 0
@@ -86,7 +84,7 @@ struct SwipeableCardsView: View {
                                 }
                                 .onEnded { _ in
                                     if abs(self.dragState.width) > swipeThreshold {
-                                        let swipeDirection: CardView.SwipeDirection = self.dragState.width > 0 ? .right : .left
+                                        let swipeDirection: BoardGameCard.SwipeDirection = self.dragState.width > 0 ? .right : .left
                                         model.updateTopCardSwipeDirection(swipeDirection)
                                         
                                         withAnimation(.easeOut(duration: 0.5)) {
