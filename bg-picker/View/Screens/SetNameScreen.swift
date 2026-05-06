@@ -8,37 +8,53 @@
 import SwiftUI
 
 struct SetNameScreen: View {
-    @StateObject var viewModel = SetNameViewModel()
-    @State private var goToLobby = false
+    @StateObject var viewModel: SetNameViewModel = SetNameViewModel()
+    @FocusState var isFocused: Bool
+    @Binding var goToLobby: Bool
     
     var body: some View {
-        ZStack {
+        VStack (spacing: 0) {
             VStack(spacing: 100) {
+                Spacer()
+                
                 Text("Who is this?")
                     .foregroundStyle(.white)
                     .font(Font.title)
                 
                 HStack(alignment: .center, spacing: 4) {
                     TextField("Plain", text: $viewModel.name, prompt:
-                        Text("Your Name")
+                                Text("Your Name")
                         .font(.headline)
                         .foregroundStyle(.white.opacity(0.5))
                     )
-                        .font(.headline)
-                        .tint(.white)
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical, 14)
-                        .padding(.leading, 1)
-                        .onChange(of: viewModel.name) { _, newValue in
-                            if newValue.count > 20 {
-                                viewModel.name = String(newValue.prefix(20))
+                    .focused($isFocused)
+                    .font(.headline)
+                    .tint(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 14)
+                    .padding(.leading, 1)
+                    .glassEffect(.clear, in: .rect(cornerRadius: 10))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            isFocused = true
+                        }
+                    }
+                    .onChange(of: isFocused) { _, newValue in
+                        if !newValue {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isFocused = true
                             }
                         }
-                        .modifier(ShakeEffect(shakes: viewModel.shouldShake ? 2 : 0))
-                        .animation(Animation.default.repeatCount(2).speed(10), value: viewModel.shouldShake)
+                    }
+                    .onChange(of: viewModel.name) { _, newValue in
+                        if newValue.count > 20 {
+                            viewModel.name = String(newValue.prefix(20))
+                        }
+                    }
+                    .modifier(ShakeEffect(shakes: viewModel.shouldShake ? 2 : 0))
+                    .animation(Animation.default.repeatCount(2).speed(10), value: viewModel.shouldShake)
+                    
                 }
-                .glassEffect(.clear, in: .rect(cornerRadius: 10))
                 .padding(.horizontal, 52)
                 .padding(.vertical, 6)
             }
@@ -50,13 +66,14 @@ struct SetNameScreen: View {
                         self.goToLobby = true
                     }
                 })
-                    .padding(.vertical, 88)
-                    .padding(.horizontal, 52)
+                .padding(.vertical, 88)
+                .padding(.horizontal, 52)
             }
         }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $goToLobby) {
-            LobbyScreen().navigationBarBackButtonHidden(true)
+        .background() {
+            Image("BackgroundImage")
+                .resizable()
+                .ignoresSafeArea()
         }
     }
 }
@@ -80,6 +97,6 @@ struct ShakeEffect: GeometryEffect {
     }
 
 #Preview {
-    SetNameScreen()
+    SetNameScreen(goToLobby: .constant(false) )
 }
     

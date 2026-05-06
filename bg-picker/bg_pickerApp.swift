@@ -11,7 +11,19 @@ import SwiftUI
 struct bg_pickerApp: App {
     var body: some Scene {
         WindowGroup {
-            StarterScreen()
+            FirstScreen()
+        }
+    }
+}
+
+struct FirstScreen: View {
+    @State var isNameSet : Bool = UserManager.shared.isNameSet
+    
+    var body: some View {
+        if !isNameSet {
+            SetNameScreen(goToLobby: $isNameSet)
+        } else {
+            LobbyScreen().transition(.opacity)
         }
     }
 }

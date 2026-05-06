@@ -17,15 +17,17 @@ class SetNameViewModel: ObservableObject{
             !(name.trimmingCharacters(in: .whitespacesAndNewlines) == "")
         }
         
-        public func saveName(completion: () -> ()){
+        func saveName(completion: () -> ()){
             if !validName {
                 shouldShake.toggle()
+                HapticManager.shared.error()
                 return
             }
             
             UserManager.shared.name = name
             UserManager.shared.isNameSet = true
+            
             completion()
         }
-    }
+}
 
