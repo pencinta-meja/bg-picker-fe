@@ -16,6 +16,10 @@ struct LoadingScreen: View {
 
     var body: some View {
         ZStack (alignment: .top){
+            Image("BackgroundImage")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
             VStack(alignment: .center, spacing: 112){
                 
                 Text("Abraar's Room")
