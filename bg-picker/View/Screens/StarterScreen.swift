@@ -11,12 +11,19 @@ struct StarterScreen: View {
     private let isNameSet = UserManager.shared.isNameSet
     
     var body: some View {
-        NavigationStack {
-            if !isNameSet {
-                SetNameScreen()
-            } else {
-                LobbyScreen()
+        ZStack {
+            Image("BackgroundImage")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            
+            NavigationStack {
+                if !isNameSet {
+                    SetNameScreen()
+                } else {
+                    LobbyScreen()
+                }
             }
-        }
+        }.ignoresSafeArea(.keyboard)
     }
 }

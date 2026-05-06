@@ -13,12 +13,6 @@ struct SetNameScreen: View {
     
     var body: some View {
         ZStack {
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-
             VStack(spacing: 100) {
                 Text("Who is this?")
                     .foregroundStyle(.white)
