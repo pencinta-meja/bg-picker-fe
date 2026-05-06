@@ -7,18 +7,18 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @StateObject private var swipeModel: SwipeableCardsView.Model
+struct SwipeScreen: View {
+    @StateObject private var swipeModel: SwipeableViewModel
 
     init() {
         _swipeModel = StateObject(
-            wrappedValue: SwipeableCardsView.Model(cards: BoardGameCSVLoader.loadCards())
+            wrappedValue: SwipeableViewModel(cards: BoardGameCSVLoader.loadCards())
         )
     }
 
     var body: some View {
         ZStack(alignment: .top) {
-            Image("background")
+            Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
@@ -31,7 +31,7 @@ struct ContentView: View {
 
                 Spacer(minLength: 8)
 
-                SwipeableCardsView(model: swipeModel) { _ in
+                SwipeableCardsView(swipeableViewModel: swipeModel) { _ in
                     finishSwiping()
                 }
                 .padding(.top, 16)
@@ -65,6 +65,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    SwipeScreen()
 }
 
