@@ -10,7 +10,8 @@ struct CardView: View {
     enum SwipeDirection {
         case left, right, none
     }
-
+    
+    //Pisah karna model
     struct Model: Identifiable, Equatable {
         let id = UUID()
         let title: String

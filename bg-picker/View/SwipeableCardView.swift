@@ -9,6 +9,8 @@ import SwiftUI
 import Combine
 
 struct SwipeableCardsView: View {
+    
+    //Pisah karna model
     class Model: ObservableObject {
         private var originalCards: [CardView.Model]
         @Published var unswipedCards: [CardView.Model]

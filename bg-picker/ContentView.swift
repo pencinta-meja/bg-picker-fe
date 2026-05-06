@@ -68,6 +68,7 @@ struct ContentView: View {
     ContentView()
 }
 
+//Pisah karna model
 private enum BoardGameCSVLoader {
     private static let nameIndex = 0
     private static let descriptionIndex = 1
