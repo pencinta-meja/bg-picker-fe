@@ -9,9 +9,10 @@ import SwiftUI
 
 struct LobbyScreen: View {
     var userName : String = UserManager.shared.name
+    @State private var path = NavigationPath()
     
     var body: some View {
-        NavigationStack {
+        NavigationStack (path: $path) {
             VStack (spacing: 106) {
                 Spacer()
                 Text(
@@ -19,7 +20,7 @@ struct LobbyScreen: View {
                 ).font(.largeTitle).foregroundStyle(.white)
                 VStack (spacing: 12){
                     Button(action: {
-                        
+                        path.append(Route.roomSetting)
                     }) {
                         HStack(spacing: 12) {
                             Image(systemName: "plus.app.fill")
@@ -39,7 +40,9 @@ struct LobbyScreen: View {
                         .background(Color("PrimaryButton"))
                         .clipShape(Capsule())
                     }
-                    Button(action: {}) {
+                    Button(action: {
+                        path.append(Route.pinInput)
+                    }) {
                         HStack(spacing: 12) {
                             Image(systemName: "arrow.right.to.line")
                                 .font(.body)
@@ -66,6 +69,18 @@ struct LobbyScreen: View {
                 Image("BackgroundImage")
                     .resizable()
                     .ignoresSafeArea()
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .roomSetting:
+                    RoomSettingScreen(path: $path)
+                
+                case .pinInput:
+                    PinInputScreen(path: $path)
+                    
+                case .waitingRoom:
+                    WaitingRoomScreen(path: $path)
+                }
             }
         
         }
