@@ -10,6 +10,8 @@ import SwiftUI
 struct PinInputScreen: View {
     var userName: String = UserManager.shared.name
     
+    @Binding var path: NavigationPath
+    
     @State private var pin: String = ""
     @FocusState private var isFocused: Bool
     
@@ -60,5 +62,5 @@ struct PinInputScreen: View {
 }
 
 #Preview {
-    PinInputScreen()
+    PinInputScreen(path: .constant(NavigationPath()))
 }

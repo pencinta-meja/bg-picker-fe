@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-enum Route: Hashable {
-    case roomSetting
-    case pinInput
-}
-
 struct LobbyScreen: View {
     var userName : String = UserManager.shared.name
     @State private var path = NavigationPath()
@@ -78,12 +73,13 @@ struct LobbyScreen: View {
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .roomSetting:
-                    RoomSettingScreen()
+                    RoomSettingScreen(path: $path)
                 
                 case .pinInput:
-                    PinInputScreen()
-
-                
+                    PinInputScreen(path: $path)
+                    
+                case .waitingRoom:
+                    WaitingRoomScreen(path: $path)
                 }
             }
         
