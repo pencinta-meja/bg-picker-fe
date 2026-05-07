@@ -1,23 +1,16 @@
-//
-//  SwipeableCardView.swift
-//  bg-picker
-//
-//  Created by Filipus Darren Siswanto on 05/05/26.
-//
-
 import SwiftUI
 import Combine
 
 struct SwipeableCardsView: View {
     
-    @ObservedObject var swipeableViewModel: SwipeableViewModel
+    @ObservedObject var swipeableViewModel: SwipeViewModel
     @State private var dragState = CGSize.zero
     @State private var cardRotation: Double = 0
     
     private let swipeThreshold: CGFloat = 100.0
     private let rotationFactor: Double = 35.0
     
-    var action: (SwipeableViewModel) -> Void
+    var action: (SwipeViewModel) -> Void
     
     var body: some View {
         GeometryReader { geometry in

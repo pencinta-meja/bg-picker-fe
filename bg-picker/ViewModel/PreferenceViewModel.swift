@@ -9,8 +9,6 @@ class PreferenceViewModel: ObservableObject {
         networkManager.get(endpoint: "http://187.77.115.63/boardgame/room/\(RoomManager.shared.id!)/mechanics") { (response: GetBoardgameMechanicsResponseDto?) in
             DispatchQueue.main.async {
                 if let response = response {
-                    print("Response MECHANIC")
-                    print(response.mechanics)
                     let mechanics = response.mechanics.compactMap { Mechanic.fromString($0) }
                     completion(mechanics)
                 } else {
@@ -39,7 +37,6 @@ class PreferenceViewModel: ObservableObject {
         
         networkManager.post(endpoint: endpoint, payload: payloadData) { (response: GenerateSwipeListResponseDto?) in
             if let response = response {
-                print("Mechanics saved: \(response)")
                 SwipeManager.shared.saveSwipeList(response.boardgames)
                 completion(true)
             } else {

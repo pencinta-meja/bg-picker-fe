@@ -15,8 +15,6 @@ class WaitingRoomViewModel: ObservableObject {
     }
     
     private func startRoomAsHost(completion: @escaping () -> ()) {
-        print("User is Host: Starting Room")
-        
         let payload: [String: Any] = [
             "userId": UserManager.shared.id ?? "",
         ]
@@ -41,8 +39,6 @@ class WaitingRoomViewModel: ObservableObject {
     }
     
     private func checkRoomStatus(completion: @escaping () -> ()) {
-        print("User is not Host: Checking Room Status")
-        
         networkManager.get(endpoint: "http://187.77.115.63/room/\(RoomManager.shared.id!)") { (response: GetRoomResponseDto?) in
             DispatchQueue.main.async {
                 if let response = response {

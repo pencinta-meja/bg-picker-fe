@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SwipeScreen: View {
     @Binding var path: NavigationPath
-//    @StateObject private var swipeModel: SwipeableViewModel
+    @ObservedObject private var viewModel = SwipeViewModel()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -19,21 +19,21 @@ struct SwipeScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Text("Abra's Room")
+                Text("\(UserManager.shared.name)'s Room")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.top, 70)
 
                 Spacer(minLength: 8)
 
-//                SwipeableCardsView(swipeableViewModel: swipeModel) { _ in
-//                    finishSwiping()
-//                }
+                SwipeableCardsView(swipeableViewModel: viewModel) { _ in
+                    finishSwiping()
+                }
                 .padding(.top, 16)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, maxHeight: 560)
                 .onAppear {
-//                    swipeModel.reset()
+                    viewModel.reset()
                 }
 
                 Spacer(minLength: 32)
@@ -54,12 +54,12 @@ struct SwipeScreen: View {
     }
 
     private func finishSwiping() {
-//        print(swipeModel.swipedCards.map(\.title))
-//        swipeModel.reset()
+        print(viewModel.swipedCards.map(\.title))
+        viewModel.reset()
     }
 }
 
-#Preview {
-    SwipeScreen(path: .constant(NavigationPath()))
-}
-
+//#Preview {
+//    SwipeScreen(path: .constant(NavigationPath()))
+//}
+//

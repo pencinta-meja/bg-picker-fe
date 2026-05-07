@@ -28,7 +28,6 @@ struct PreferenceScreen: View {
                     .foregroundStyle(.white)
                     .font(Font.title)
 
-                // Make the mechanics list scrollable
                 ScrollView(.vertical) {
                     LazyVStack(alignment: .leading, spacing: 16) {
                         ForEach(mechanicRows.indices, id: \.self) { rowIndex in
@@ -55,7 +54,6 @@ struct PreferenceScreen: View {
                     viewModel.selectedMechanics(selectedMechanics: selectedMechanics) { success in
                         if success {
                             print("Mechanics saved successfully")
-                            // Navigate to the next screen after saving mechanics
                             path.append(Route.swiping)
                         } else {
                             print("Failed to save mechanics")
@@ -69,7 +67,6 @@ struct PreferenceScreen: View {
             .padding(.top, 40)
         }
         .onAppear {
-            // Fetch the mechanics when the screen appears
             viewModel.getAllMechanics() { fetchedMechanics in
                 mechanics = fetchedMechanics
             }
