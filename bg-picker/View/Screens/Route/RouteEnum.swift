@@ -10,4 +10,5 @@ enum Route: Hashable {
     case pinInput
     case waitingRoom
     case mechanicPreference
+    case swiping
 }

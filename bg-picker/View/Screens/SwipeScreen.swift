@@ -8,13 +8,8 @@
 import SwiftUI
 
 struct SwipeScreen: View {
-    @StateObject private var swipeModel: SwipeableViewModel
-
-    init() {
-        _swipeModel = StateObject(
-            wrappedValue: SwipeableViewModel(cards: BoardGameCSVLoader.loadCards())
-        )
-    }
+    @Binding var path: NavigationPath
+//    @StateObject private var swipeModel: SwipeableViewModel
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -31,14 +26,14 @@ struct SwipeScreen: View {
 
                 Spacer(minLength: 8)
 
-                SwipeableCardsView(swipeableViewModel: swipeModel) { _ in
-                    finishSwiping()
-                }
+//                SwipeableCardsView(swipeableViewModel: swipeModel) { _ in
+//                    finishSwiping()
+//                }
                 .padding(.top, 16)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, maxHeight: 560)
                 .onAppear {
-                    swipeModel.reset()
+//                    swipeModel.reset()
                 }
 
                 Spacer(minLength: 32)
@@ -59,12 +54,12 @@ struct SwipeScreen: View {
     }
 
     private func finishSwiping() {
-        print(swipeModel.swipedCards.map(\.title))
-        swipeModel.reset()
+//        print(swipeModel.swipedCards.map(\.title))
+//        swipeModel.reset()
     }
 }
 
 #Preview {
-    SwipeScreen()
+    SwipeScreen(path: .constant(NavigationPath()))
 }
 

@@ -83,7 +83,11 @@ struct LobbyScreen: View {
                     
                 case .mechanicPreference:
                     PreferenceScreen(path: $path)
+                    
+                case .swiping:
+                    SwipeScreen(path: $path)
                 }
+                
                 
                 
             }
