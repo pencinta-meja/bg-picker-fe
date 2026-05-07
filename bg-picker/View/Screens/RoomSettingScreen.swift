@@ -25,6 +25,7 @@ struct RoomSettingScreen: View {
     
     @State private var groupSize: GroupSize = .two
     @State private var maxDuration: MaxDuration = .fifteen
+    @ObservedObject private var viewModel = RoomSettingViewModel()
     
     @Binding var path: NavigationPath
     
@@ -43,10 +44,11 @@ struct RoomSettingScreen: View {
                     .foregroundStyle(.white)
                     .padding(.top, 26)
                 
-                Spacer()
-                
+                Spacer()                
                 NextPrimaryButton(action: {
-                    path.append(Route.waitingRoom)
+                    viewModel.createRoom(groupSize: groupSize, maxDuration: maxDuration) {
+                        path.append(Route.waitingRoom)
+                    }
                 })
                 .padding(.vertical, 88)
                 .padding(.horizontal, 52)

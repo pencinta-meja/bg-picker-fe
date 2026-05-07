@@ -1,5 +1,3 @@
-import Foundation
-
 struct CreateUserResponseDto: Decodable {
     let user: UserDto
 }
