@@ -1,14 +1,9 @@
-//
-//  PodiumScreen.swift
-//  bg-picker
-//
-//  Created by Jayvin Tiya Silo on 06/05/26.
-//
-
 import SwiftUI
 import Combine
 
 struct PodiumScreen: View {
+    @Binding var path: NavigationPath
+    @ObservedObject private var viewModel = PodiumViewModel()
     
     var body: some View {
         ZStack (){
@@ -17,20 +12,23 @@ struct PodiumScreen: View {
                 .scaledToFill()
                 .ignoresSafeArea()
             
-            
-            
             VStack(){
-                HStack{
-                    Text("Abraar's Room")
-                        .font(.title)
-                        .foregroundStyle(.white)
-                        .padding(.top)
-                }
-                ScrollView{
-                    PodiumCard(title: "All Matches", images: ["background","background","background","background","background"])
-                    PodiumCard(title: "5/6 Matches", images: ["background","background","background"])
-                    PodiumCard(title: "4/6 Matches", images: ["background","background"])
-                    PodiumCard(title: "3/6 Matches", images: ["background","background"])
+                Text("\(UserManager.shared.name)'s Room")
+                    .font(.title)
+                    .foregroundStyle(.white)
+                    .padding(.top)
+                
+                ScrollView {
+                    // Fetch and display podium categories
+                    let groupedResults = viewModel.groupResultsByLikes()
+                    
+                    ForEach(groupedResults.keys.sorted(), id: \.self) { numLikes in
+                        // Prepare the boardgames for each numLikes group
+                        let boardgames = groupedResults[numLikes] ?? []
+                        let images = boardgames.map { $0.boardgame.cover_image_path }
+
+                        PodiumCard(title: "\(numLikes) Match", images: images)
+                    }
                 }
                 
             }
@@ -40,5 +38,5 @@ struct PodiumScreen: View {
     }
 }
 #Preview {
-    PodiumScreen()
+    PodiumScreen(path: .constant(NavigationPath()))
 }

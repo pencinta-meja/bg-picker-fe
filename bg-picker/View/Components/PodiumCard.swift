@@ -22,16 +22,33 @@ struct PodiumCard: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(images, id: \.self) { imageName in
-                        Image(imageName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 109, height: 169)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.white, lineWidth: 2)
-                            )
+                    ForEach(images, id: \.self) { imageUrl in
+                        AsyncImage(url: URL(string: imageUrl)!) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 109, height: 169)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white, lineWidth: 2)
+                                )
+                        } placeholder: {
+                            // Placeholder image while loading
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(width: 109, height: 169)
+                        }
+//                        }
+//                        Image(imageName)
+//                            .resizable()
+//                            .scaledToFill()
+//                            .frame(width: 109, height: 169)
+//                            .clipShape(RoundedRectangle(cornerRadius: 12))
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 12)
+//                                    .stroke(Color.white, lineWidth: 2)
+//                            )
                     }
                 }
                 .padding(.horizontal)

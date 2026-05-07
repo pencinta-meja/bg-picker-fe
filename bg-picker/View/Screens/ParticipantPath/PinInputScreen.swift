@@ -14,6 +14,7 @@ struct PinInputScreen: View {
     
     @State private var pin: String = ""
     @FocusState private var isFocused: Bool
+    @ObservedObject private var viewModel = PinInputViewModel()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -48,7 +49,11 @@ struct PinInputScreen: View {
             Spacer()
             
             VStack(spacing: 0) {
-                NextPrimaryButton(action: {})
+                NextPrimaryButton(action: {
+                    viewModel.joinRoom(pin: pin) {
+                        path.append(Route.waitingRoom)
+                    }
+                })
                     .padding(.bottom, 88)
                     .padding(.horizontal, 52)
             }

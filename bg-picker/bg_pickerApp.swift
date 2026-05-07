@@ -18,7 +18,6 @@ struct bg_pickerApp: App {
 
 struct FirstScreen: View {
     @State var isNameSet : Bool = UserManager.shared.isNameSet
-    
     var body: some View {
         if !isNameSet {
             SetNameScreen(goToLobby: $isNameSet)

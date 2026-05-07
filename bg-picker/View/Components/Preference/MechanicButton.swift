@@ -47,7 +47,3 @@ struct MechanicButton: View {
             
     }
 }
-
-#Preview {
-    PreferenceScreen()
-}

@@ -8,13 +8,8 @@
 import SwiftUI
 
 struct SwipeScreen: View {
-    @StateObject private var swipeModel: SwipeableViewModel
-
-    init() {
-        _swipeModel = StateObject(
-            wrappedValue: SwipeableViewModel(cards: BoardGameCSVLoader.loadCards())
-        )
-    }
+    @Binding var path: NavigationPath
+    @ObservedObject private var viewModel = SwipeViewModel()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -24,21 +19,21 @@ struct SwipeScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Text("Abra's Room")
+                Text("\(UserManager.shared.name)'s Room")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.top, 70)
 
                 Spacer(minLength: 8)
 
-                SwipeableCardsView(swipeableViewModel: swipeModel) { _ in
+                SwipeableCardsView(swipeableViewModel: viewModel) { _ in
                     finishSwiping()
                 }
                 .padding(.top, 16)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, maxHeight: 560)
                 .onAppear {
-                    swipeModel.reset()
+                    viewModel.reset()
                 }
 
                 Spacer(minLength: 32)
@@ -59,12 +54,13 @@ struct SwipeScreen: View {
     }
 
     private func finishSwiping() {
-        print(swipeModel.swipedCards.map(\.title))
-        swipeModel.reset()
+        viewModel.finishRoom {
+            path.append(Route.podium)
+        }
     }
 }
 
-#Preview {
-    SwipeScreen()
-}
-
+//#Preview {
+//    SwipeScreen(path: .constant(NavigationPath()))
+//}
+//

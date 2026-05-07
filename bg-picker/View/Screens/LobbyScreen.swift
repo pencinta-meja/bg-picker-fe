@@ -80,7 +80,17 @@ struct LobbyScreen: View {
                     
                 case .waitingRoom:
                     WaitingRoomScreen(path: $path)
+                    
+                case .mechanicPreference:
+                    PreferenceScreen(path: $path)
+                    
+                case .swiping:
+                    SwipeScreen(path: $path)
+                    
+                case .podium:
+                    PodiumScreen(path: $path)
                 }
+
             }
         
         }

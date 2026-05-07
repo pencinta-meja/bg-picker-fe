@@ -11,13 +11,15 @@ import Combine
 struct WaitingRoomScreen: View {
     var userName: String = UserManager.shared.name
     
-    var roomPin: String = "200-345"
+    var roomPin: String = RoomManager.shared.code
     var readyCount: Int = 0
     var totalCount: Int = 0
     
     @State private var dotCount = 0
     
     @Binding var path: NavigationPath
+    
+    @ObservedObject private var viewModel = WaitingRoomViewModel()
     
     let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
     
@@ -39,7 +41,11 @@ struct WaitingRoomScreen: View {
                 
                 Spacer()
                 
-                ReadyPrimaryButton(action: {})
+                ReadyPrimaryButton(action: {
+                    viewModel.startRoom {
+                        path.append(Route.mechanicPreference)
+                    }
+                })
                     .padding(.bottom, 88)
                     .padding(.horizontal, 52)
             }
@@ -58,9 +64,9 @@ struct WaitingRoomScreen: View {
                 
                 Spacer()
                 
-                Text("\(readyCount) / \(totalCount) Ready")
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.7))
+//                Text("\(readyCount) / \(totalCount) Ready")
+//                    .font(.title3)
+//                    .foregroundStyle(.white.opacity(0.7))
                 
                 Spacer()
                 Spacer()
