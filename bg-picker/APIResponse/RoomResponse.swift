@@ -13,3 +13,7 @@ struct RoomDto: Decodable {
     let status: RoomStatus
     let resultBoardgameIds: [String]
 }
+
+struct JoinRoomResponseDto: Decodable {
+    let room: RoomDto
+}

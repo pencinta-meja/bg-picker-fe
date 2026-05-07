@@ -15,6 +15,7 @@ class RoomSettingViewModel: ObservableObject {
         }
         return nil
     }
+    
     func createRoom(groupSize: GroupSize, maxDuration: MaxDuration, completion: @escaping () -> ()){
         let payload: [String: Any] = [
             "userId": UserManager.shared.id ?? "",
@@ -29,6 +30,7 @@ class RoomSettingViewModel: ObservableObject {
         networkManager.post(endpoint: "http://187.77.115.63/room", payload: payloadData) { (response: CreateRoomResponseDto?) in
             DispatchQueue.main.async {
                 if let response = response {
+                    RoomManager.shared.saveCode(code: response.room.code)
                     completion()
                 } else {
                     print("Failed to create room or no response")

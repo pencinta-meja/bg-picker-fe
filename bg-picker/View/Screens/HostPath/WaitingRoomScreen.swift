@@ -11,7 +11,7 @@ import Combine
 struct WaitingRoomScreen: View {
     var userName: String = UserManager.shared.name
     
-    var roomPin: String = "200-345"
+    var roomPin: String = RoomManager.shared.code
     var readyCount: Int = 0
     var totalCount: Int = 0
     
@@ -58,9 +58,9 @@ struct WaitingRoomScreen: View {
                 
                 Spacer()
                 
-                Text("\(readyCount) / \(totalCount) Ready")
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.7))
+//                Text("\(readyCount) / \(totalCount) Ready")
+//                    .font(.title3)
+//                    .foregroundStyle(.white.opacity(0.7))
                 
                 Spacer()
                 Spacer()
