@@ -19,6 +19,8 @@ struct WaitingRoomScreen: View {
     
     @Binding var path: NavigationPath
     
+    @ObservedObject private var viewModel = WaitingRoomViewModel()
+    
     let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
     
     var body: some View {
@@ -39,7 +41,11 @@ struct WaitingRoomScreen: View {
                 
                 Spacer()
                 
-                ReadyPrimaryButton(action: {})
+                ReadyPrimaryButton(action: {
+                    viewModel.startRoom {
+                        path.append(Route.mechanicPreference)
+                    }
+                })
                     .padding(.bottom, 88)
                     .padding(.horizontal, 52)
             }

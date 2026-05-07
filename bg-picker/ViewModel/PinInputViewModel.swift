@@ -25,6 +25,9 @@ class PinInputViewModel: ObservableObject {
         networkManager.post(endpoint: "http://187.77.115.63/room/join", payload: payloadData) { (response: JoinRoomResponseDto?) in
             DispatchQueue.main.async {
                 if let response = response {
+                    RoomManager.shared.id = response.room.id
+                    RoomManager.shared.code = response.room.code
+                    RoomManager.shared.isHost = UserManager.shared.id == response.room.host.id
                     completion()
                 } else {
                     print("Failed to join the room")

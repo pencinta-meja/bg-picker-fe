@@ -1,5 +1,9 @@
 import Foundation
 
+struct GetRoomResponseDto: Decodable {
+    let room: RoomDto
+}
+
 struct CreateRoomResponseDto: Decodable {
     let room: RoomDto
 }
@@ -15,5 +19,9 @@ struct RoomDto: Decodable {
 }
 
 struct JoinRoomResponseDto: Decodable {
+    let room: RoomDto
+}
+
+struct StartRoomResponseDto: Decodable {
     let room: RoomDto
 }

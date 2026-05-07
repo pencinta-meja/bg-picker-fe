@@ -42,4 +42,36 @@ final class NetworkManager: ObservableObject {
                 completion(response)
             })
     }
+    
+    func get<T: Decodable>(endpoint: String, completion: @escaping (T?) -> Void) {
+        isLoading = true
+        error = nil
+        isSuccess = false
+        
+        guard let url = URL(string: endpoint) else {
+            self.error = "Invalid URL"
+            self.isLoading = false
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        cancellable = URLSession.shared.dataTaskPublisher(for: request)
+            .map { $0.data }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    self.error = error.localizedDescription
+                }
+                self.isLoading = false
+            }, receiveValue: { response in
+                self.isSuccess = true
+                completion(response)
+            })
+    }
 }

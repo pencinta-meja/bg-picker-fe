@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PreferenceScreen: View {
     @State private var selectedMechanics: Set<Mechanic> = []
+    @Binding var path: NavigationPath
 
     private let mechanics = Mechanic.allCases
 
@@ -40,8 +41,7 @@ struct PreferenceScreen: View {
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
+                    }                }
                 .padding(.horizontal, 27)
                 .padding(.top, 70)
                 
@@ -61,5 +61,5 @@ struct PreferenceScreen: View {
 
 
 #Preview {
-    PreferenceScreen()
+    PreferenceScreen(path: .constant(NavigationPath()))
 }

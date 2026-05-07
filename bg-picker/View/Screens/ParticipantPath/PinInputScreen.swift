@@ -51,7 +51,7 @@ struct PinInputScreen: View {
             VStack(spacing: 0) {
                 NextPrimaryButton(action: {
                     viewModel.joinRoom(pin: pin) {
-                        print("TEST")
+                        path.append(Route.waitingRoom)
                     }
                 })
                     .padding(.bottom, 88)

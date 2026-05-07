@@ -13,6 +13,6 @@ struct RoomInfo {
 
 enum RoomStatus: String, CaseIterable, Decodable {
     case waiting = "Waiting"
-    case swping = "Swiping"
+    case swiping = "Swiping"
     case finished = "Finished"
 }

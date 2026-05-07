@@ -31,6 +31,8 @@ class RoomSettingViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if let response = response {
                     RoomManager.shared.saveCode(code: response.room.code)
+                    RoomManager.shared.saveId(id: response.room.id)
+                    RoomManager.shared.saveIsHost(isHost: UserManager.shared.id == response.room.host.id)
                     completion()
                 } else {
                     print("Failed to create room or no response")

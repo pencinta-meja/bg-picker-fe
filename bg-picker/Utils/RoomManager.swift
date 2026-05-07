@@ -16,6 +16,7 @@ final class RoomManager {
     
     private enum Keys {
         static let code = "room_code"
+        static let isHost = "is_host"
         static let id = "code_id"
     }
 
@@ -29,6 +30,11 @@ final class RoomManager {
         set { defaults.set(newValue, forKey: Keys.id) }
     }
     
+    var isHost: Bool? {
+        get { defaults.bool(forKey: Keys.isHost) }
+        set { defaults.set(newValue, forKey: Keys.isHost) }
+    }
+    
     func saveCode(code: String) {
         self.code = code
     }
@@ -37,9 +43,14 @@ final class RoomManager {
         self.id = id
     }
     
+    func saveIsHost (isHost: Bool) {
+        self.isHost = isHost
+    }
+    
     func clearSession() {
         self.code = ""
         self.id = nil
+        self.isHost = nil
     }
     
     func isIdSet() -> Bool {
