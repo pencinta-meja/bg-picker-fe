@@ -54,8 +54,9 @@ struct SwipeScreen: View {
     }
 
     private func finishSwiping() {
-        print(viewModel.swipedCards.map(\.title))
-        viewModel.reset()
+        viewModel.finishRoom {
+            path.append(Route.podium)
+        }
     }
 }
 

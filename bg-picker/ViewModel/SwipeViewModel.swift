@@ -67,5 +67,50 @@ class SwipeViewModel: ObservableObject {
             }
         }
     }
+    
+    func finishRoom(completion: @escaping () -> ()) {
+        guard let roomId = RoomManager.shared.id else {
+            print("Room ID is missing")
+            return
+        }
 
+        let payload: [String: Any] = [
+            "userId": UserManager.shared.id!,
+        ]
+        
+        guard let payloadData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+            print("Failed to serialize data")
+            return
+        }
+        
+        if RoomManager.shared.isHost == true {
+            let endpoint = "http://187.77.115.63/room/\(roomId)/finish"
+            networkManager.post(endpoint: endpoint, payload: payloadData) { (response: FinishRoomResponseDto?) in
+                DispatchQueue.main.async {
+                    if let response = response {
+                        print("ROOM ID \(roomId)")
+                        print("USER ID \(UserManager.shared.id!)")
+                        RoomManager.shared.saveRoomResult(result: response.roomResults)
+                        print("Room finished successfully: \(response)")
+                        completion()
+                    } else {
+                        print("Failed to finish the room")
+                    }
+                }
+            }
+        } else {
+            let endpoint = "http://187.77.115.63/room/\(roomId)/result"
+            networkManager.get(endpoint: endpoint) { (response: FinishRoomResponseDto?) in
+                DispatchQueue.main.async {
+                    if let response = response {
+                        RoomManager.shared.saveRoomResult(result: response.roomResults)
+                        print("Room result fetched successfully: \(response)")
+                        completion()
+                    } else {
+                        print("Failed to fetch room result")
+                    }
+                }
+            }
+        }
+    }
 }

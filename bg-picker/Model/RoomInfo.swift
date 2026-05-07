@@ -11,7 +11,7 @@ struct RoomInfo {
     var roomCode: String
 }
 
-enum RoomStatus: String, CaseIterable, Decodable {
+enum RoomStatus: String, CaseIterable, Decodable, Encodable {
     case waiting = "Waiting"
     case swiping = "Swiping"
     case finished = "Finished"

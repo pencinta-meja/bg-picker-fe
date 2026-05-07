@@ -86,10 +86,11 @@ struct LobbyScreen: View {
                     
                 case .swiping:
                     SwipeScreen(path: $path)
+                    
+                case .podium:
+                    PodiumScreen(path: $path)
                 }
-                
-                
-                
+
             }
         
         }

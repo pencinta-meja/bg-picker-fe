@@ -18,6 +18,7 @@ final class RoomManager {
         static let code = "room_code"
         static let isHost = "is_host"
         static let id = "code_id"
+        static let roomResult = "room_result"
     }
 
     var code: String {
@@ -35,6 +36,26 @@ final class RoomManager {
         set { defaults.set(newValue, forKey: Keys.isHost) }
     }
     
+    var roomResult: [RoomResultDto]? {
+        get {
+            if let data = defaults.data(forKey: Keys.roomResult) {
+                let decoder = JSONDecoder()
+                if let result = try? decoder.decode([RoomResultDto].self, from: data) {
+                    return result
+                }
+            }
+            return nil
+        }
+        set {
+            if let newValue = newValue {
+                let encoder = JSONEncoder()
+                if let encoded = try? encoder.encode(newValue) {
+                    defaults.set(encoded, forKey: Keys.roomResult)
+                }
+            }
+        }
+    }
+    
     func saveCode(code: String) {
         self.code = code
     }
@@ -45,6 +66,10 @@ final class RoomManager {
     
     func saveIsHost (isHost: Bool) {
         self.isHost = isHost
+    }
+    
+    func saveRoomResult(result: [RoomResultDto]) {
+        self.roomResult = result
     }
     
     func clearSession() {
