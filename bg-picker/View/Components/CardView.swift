@@ -46,7 +46,7 @@ struct CardView: View {
                 .fill(Color.white)
 
             ZStack(alignment: .bottomLeading) {
-                cardImage
+                gameImage(local: model.thumbnailLocalImage, url: model.thumbnailURL)
                     .frame(width: width - 20, height: height - 20)
                     .clipped()
 
@@ -113,16 +113,12 @@ struct CardView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
     }
 
-    @ViewBuilder
-    private var cardImage: some View {
-        remoteImage(url: model.thumbnailURL)
-    }
-
     private var detailSheet: some View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    remoteImage(url: model.gameplayImageURL ?? model.thumbnailURL)
+                    gameImage(local: model.gameplayLocalImage ?? model.thumbnailLocalImage,
+                              url: model.gameplayImageURL ?? model.thumbnailURL)
                         .frame(maxWidth: .infinity)
                         .frame(height: geometry.size.height * 0.4)
                         .overlay(alignment: .bottom) {
@@ -140,7 +136,7 @@ struct CardView: View {
 
                     VStack(alignment: .leading, spacing: 24) {
                         HStack(alignment: .top, spacing: 16) {
-                            remoteImage(url: model.thumbnailURL)
+                            gameImage(local: model.thumbnailLocalImage, url: model.thumbnailURL)
                                 .frame(width: 80, height: 80)
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
@@ -187,6 +183,19 @@ struct CardView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .presentationBackground(Color(red: 22/255, green: 5/255, blue: 36/255))
+    }
+
+    // MARK: – Unified image loader (local first, URL fallback)
+
+    @ViewBuilder
+    private func gameImage(local: UIImage?, url: URL?) -> some View {
+        if let local {
+            Image(uiImage: local)
+                .resizable()
+                .scaledToFill()
+        } else {
+            remoteImage(url: url)
+        }
     }
 
     @ViewBuilder
@@ -246,38 +255,20 @@ struct CardView: View {
     }
 
     private var stackOffset: CGFloat {
-        if isTopCard {
-            return 0
-        }
-
-        if isSecondCard {
-            return -20
-        }
-
+        if isTopCard { return 0 }
+        if isSecondCard { return -20 }
         return -35
     }
 
     private var stackRotation: Double {
-        if isTopCard {
-            return 0
-        }
-
-        if isSecondCard {
-            return -4
-        }
-
+        if isTopCard { return 0 }
+        if isSecondCard { return -4 }
         return 6
     }
 
     private var stackScale: CGFloat {
-        if isTopCard {
-            return 1
-        }
-
-        if isSecondCard {
-            return 0.97
-        }
-
+        if isTopCard { return 1 }
+        if isSecondCard { return 0.97 }
         return 0.94
     }
 
@@ -285,7 +276,6 @@ struct CardView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color(.systemGray6))
-
             Image(systemName: systemImage)
                 .font(.system(size: 42, weight: .medium))
                 .foregroundStyle(.gray)
@@ -293,12 +283,8 @@ struct CardView: View {
     }
 
     private func getShadowColor() -> Color {
-        if dragOffset.width > 0 {
-            return Color.green.opacity(0.8)
-        } else if dragOffset.width < 0 {
-            return Color.red.opacity(0.8)
-        } else {
-            return Color.black.opacity(0.18)
-        }
+        if dragOffset.width > 0 { return Color.green.opacity(0.8) }
+        else if dragOffset.width < 0 { return Color.red.opacity(0.8) }
+        else { return Color.black.opacity(0.18) }
     }
 }

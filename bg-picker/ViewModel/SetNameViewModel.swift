@@ -19,32 +19,17 @@ class SetNameViewModel: ObservableObject{
             !(name.trimmingCharacters(in: .whitespacesAndNewlines) == "")
         }
         
-        func saveName(completion: @escaping () -> ()){
-            if !validName {
-                shouldShake.toggle()
-                HapticManager.shared.error()
-                return
-            }
-            
-            let payload: [String: String] = ["name": name]
-            
-            guard let payload = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                self.networkManager.error = "Failed to serialize data"
-                return
-            }
-            
-            networkManager.post(endpoint: "http://187.77.115.63/user", payload: payload) { (response: CreateUserResponseDto?) in
-                DispatchQueue.main.async {
-                    if let response = response {
-                        UserManager.shared.saveName(name: response.user.name)
-                        UserManager.shared.saveId(id: response.user.id)
-                        UserManager.shared.isNameSet = true
-                        completion()
-                    } else {
-                        self.networkManager.error = "Failed to save name"
-                    }
-                }
-            }
+    func saveName(completion: @escaping () -> ()) {
+        if !validName {
+            shouldShake.toggle()
+            HapticManager.shared.error()
+            return
         }
+        
+        // Skipping network call for now
+        UserManager.shared.saveName(name: name)
+        UserManager.shared.saveId(id: "dummy-user-id")  // ← add this
+        UserManager.shared.isNameSet = true
+        completion()
+    }
 }
-

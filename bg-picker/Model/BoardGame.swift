@@ -1,18 +1,64 @@
-//
-//  BoardGame.swift
-//  bg-picker
-//
-//  Created by Danniel on 05/05/26.
-//
+import Foundation
+import SwiftData
 
-struct BoardGame : Codable {
+enum Genre: String, CaseIterable, Codable {
+    // Resource & Trading
+    case resourceManagement = "Resource Management"
+    case trading = "Trading"
+    case commoditySpeculation = "Commodity Speculation"
+    case auction = "Auction"
+    
+    // Dice & Luck
+    case diceRolling = "Dice Rolling"
+    case pushYourLuck = "Push Your Luck"
+    
+    // Card Play
+    case cardDrafting = "Card Drafting"
+    case handManagement = "Hand Management"
+    case setCollection = "Set Collection"
+    case trickTaking = "Trick-taking"
+    case cardPlay = "Card Play"
+    
+    // Cooperative & Deduction
+    case cooperative = "Cooperative"
+    case deduction = "Deduction"
+    case memory = "Memory"
+    case puzzleSolving = "Puzzle Solving"
+    
+    // Social & Bluffing
+    case bluffing = "Bluffing"
+    case partnership = "Partnership"
+    case playerElimination = "Player Elimination"
+    case takeThat = "Take That"
+    
+    // Strategy & Building
+    case abstractStrategy = "Abstract Strategy"
+    case routeBuilding = "Route Building"
+    case networkBuilding = "Network Building"
+    case actionQueue = "Action Queue"
+    case gridMovement = "Grid Movement"
+    
+    // Party & Casual
+    case patternRecognition = "Pattern Recognition"
+    case patternBuilding = "Pattern Building"
+    case dexterity = "Dexterity"
+    case realTime = "Real-time"
+    
+    // Word
+    case wordBuilding = "Word Building"
+    case betting = "Betting"
+}
+
+@Model
+final class BoardGame {
     var name: String
-    var description: String
+    var oneLiner: String
+    var desc: String
     
     var complexity: Float
     var rating: Float
     
-    var categories: [String]
+    var genres: [Genre]
     
     var thumbnailPath: String?
     var gameplayImagePath: String?
@@ -20,67 +66,34 @@ struct BoardGame : Codable {
     var minPlayers: Int
     var maxPlayers: Int
     
-    var minPlayingTime: Int // In minutes
-    var maxPlayingTime: Int // In minutes
+    var minPlayingTime: Int
+    var maxPlayingTime: Int
     
-    enum CodingKeys: String, CodingKey {
-        case name
-        case description
-        
-        case complexity
-        case rating
-        
-        case categories
-        
-        case thumbnailPath = "thumbnail_path"
-        case gameplayImagePath = "gameplay_image_path"
-        
-        case minPlayers = "min_players"
-        case maxPlayers = "max_players"
-        
-        case minPlayingTime = "min_playing_time"
-        case maxPlayingTime = "max_playing_time"
-    }
-    
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        
-        name = try c.decodeIfPresent(String.self, forKey: .name) ?? "Unknown"
-        description = try c.decodeIfPresent(String.self, forKey: .description) ?? "Unknown"
-        
-        complexity = try c.decodeIfPresent(Float.self, forKey: .complexity) ?? 0.0
-        rating = try c.decodeIfPresent(Float.self, forKey: .rating) ?? 0.0
-        
-        categories = try c.decodeIfPresent([String].self, forKey: .categories) ?? []
-        
-        thumbnailPath = try c.decodeIfPresent(String.self, forKey: .thumbnailPath) ?? nil
-        gameplayImagePath = try c.decodeIfPresent(String.self, forKey: .gameplayImagePath) ?? nil
-        
-        minPlayers = try c.decodeIfPresent(Int.self, forKey: .minPlayers) ?? 1
-        maxPlayers = try c.decodeIfPresent(Int.self, forKey: .maxPlayers) ?? 1
-        
-        minPlayingTime = try c.decodeIfPresent(Int.self, forKey: .minPlayingTime) ?? 0
-        maxPlayingTime = try c.decodeIfPresent(Int.self, forKey: .maxPlayingTime) ?? 0
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        
-        try c.encodeIfPresent(name, forKey: .name)
-        try c.encode(description, forKey: .description)
-        
-        try c.encode(complexity, forKey: .complexity)
-        try c.encode(rating, forKey: .rating)
-        
-        try c.encode(categories, forKey: .categories)
-        
-        try c.encode(thumbnailPath, forKey: .thumbnailPath)
-        try c.encode(gameplayImagePath, forKey: .gameplayImagePath)
-        
-        try c.encode(minPlayers, forKey: .minPlayers)
-        try c.encode(maxPlayers, forKey: .maxPlayers)
-        
-        try c.encode(minPlayingTime, forKey: .minPlayingTime)
-        try c.encode(maxPlayingTime, forKey: .maxPlayingTime)
+    init(
+        name: String,
+        oneLiner: String = "",
+        desc: String = "",
+        complexity: Float = 0.0,
+        rating: Float = 0.0,
+        genres: [Genre] = [],
+        thumbnailPath: String? = nil,
+        gameplayImagePath: String? = nil,
+        minPlayers: Int = 1,
+        maxPlayers: Int = 1,
+        minPlayingTime: Int = 0,
+        maxPlayingTime: Int = 0
+    ) {
+        self.name = name
+        self.oneLiner = oneLiner
+        self.desc = desc
+        self.complexity = complexity
+        self.rating = rating
+        self.genres = genres
+        self.thumbnailPath = thumbnailPath
+        self.gameplayImagePath = gameplayImagePath
+        self.minPlayers = minPlayers
+        self.maxPlayers = maxPlayers
+        self.minPlayingTime = minPlayingTime
+        self.maxPlayingTime = maxPlayingTime
     }
 }

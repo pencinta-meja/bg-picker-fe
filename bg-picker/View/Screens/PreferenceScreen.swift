@@ -1,17 +1,27 @@
+//
+//  PreferenceScreen.swift
+//  bg-picker
+//
+
 import SwiftUI
 
 struct PreferenceScreen: View {
     @State private var selectedMechanics: Set<Mechanic> = []
     @Binding var path: NavigationPath
-    @ObservedObject private var viewModel = PreferenceViewModel()
     @State private var mechanics: [Mechanic] = []
+
+    // Pull the user's game collection from environment
+    @Environment(CollectionViewModel.self) private var collectionViewModel
+
+    // ViewModel is created after we have the games
+    @State private var viewModel: PreferenceViewModel? = nil
 
     private var mechanicRows: [[Mechanic]] {
         stride(from: 0, to: mechanics.count, by: 2).map { index in
             Array(mechanics[index..<min(index + 2, mechanics.count)])
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             Image("BackgroundImage")
@@ -39,7 +49,8 @@ struct PreferenceScreen: View {
                                         } else {
                                             selectedMechanics.insert(mechanic)
                                         }
-                                    }                                }
+                                    }
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -47,13 +58,19 @@ struct PreferenceScreen: View {
                     .padding(.horizontal, 27)
                     .padding(.top, 70)
                 }
-                
+
                 Spacer()
 
                 NextPrimaryButton {
-                    viewModel.selectedMechanics(selectedMechanics: selectedMechanics) { success in
+                    viewModel?.selectedMechanics(selectedMechanics: selectedMechanics) { success in
                         if success {
-                            print("Mechanics saved successfully")
+                            if UserManager.shared.id == nil {
+                                UserManager.shared.saveId(id: "dummy-user-id")
+                            }
+                            if RoomManager.shared.id == nil {
+                                RoomManager.shared.saveId(id: "dummy-room-id")
+                                RoomManager.shared.saveIsHost(isHost: true)
+                            }
                             path.append(Route.swiping)
                         } else {
                             print("Failed to save mechanics")
@@ -67,7 +84,9 @@ struct PreferenceScreen: View {
             .padding(.top, 40)
         }
         .onAppear {
-            viewModel.getAllMechanics() { fetchedMechanics in
+            // Build the ViewModel with the current collection games
+            viewModel = PreferenceViewModel(games: collectionViewModel.games)
+            viewModel?.getAllMechanics { fetchedMechanics in
                 mechanics = fetchedMechanics
             }
         }
