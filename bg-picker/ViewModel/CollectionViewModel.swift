@@ -18,15 +18,22 @@ final class CollectionViewModel {
 
     private func loadGames() {
         let descriptor = FetchDescriptor<BoardGame>()
-        games = (try? modelContext.fetch(descriptor)) ?? []
-
+        
+        do {
+            games = try modelContext.fetch(descriptor)
+        }
+        catch {
+            // showing some logic
+            print(error)
+        }
+        
         if games.isEmpty {
             seedDefaultGames()
         }
     }
 
     private func seedDefaultGames() {
-        Self.defaultGames().forEach { game in
+        defaultGames().forEach { game in
             modelContext.insert(game)
             games.append(game)
         }
@@ -42,6 +49,7 @@ final class CollectionViewModel {
 
     func removeGame(_ game: BoardGame) {
         guard let index = games.firstIndex(where: { $0.id == game.id }) else { return }
+        
         modelContext.delete(game)
         games.remove(at: index)
         save()
@@ -60,9 +68,8 @@ final class CollectionViewModel {
     }
 
     // Default game library
-    private static func defaultGames() -> [BoardGame] {
+    private func defaultGames() -> [BoardGame] {
         [
-           
             BoardGame(
                 name: "Unlock!",
                 oneLiner: "Escape the room with cards.",

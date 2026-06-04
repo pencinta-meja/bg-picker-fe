@@ -79,7 +79,7 @@ struct LobbyScreen: View {
                 }
                 .padding(.horizontal, 24)
 
-                // My Games — full width below
+               
                 Button {
                     path.append(Route.myGames)
                 } label: {

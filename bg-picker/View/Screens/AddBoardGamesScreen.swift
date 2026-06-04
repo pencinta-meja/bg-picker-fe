@@ -1,7 +1,4 @@
-//
-//  AddBoardGameFormScreen.swift
-//  bg-picker
-//
+
 
 import SwiftUI
 import PhotosUI
@@ -10,7 +7,6 @@ struct AddBoardGameFormScreen: View {
     let onSave: (BoardGame) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    // MARK: – Form State
 
     @State private var name = ""
     @State private var oneLiner = ""
@@ -38,7 +34,7 @@ struct AddBoardGameFormScreen: View {
         NavigationStack {
             Form {
 
-                // MARK: Photo
+                
                 Section("Photo") {
                     PhotosPicker(selection: $photoItem, matching: .images) {
                         if let img = selectedImage {
@@ -70,31 +66,31 @@ struct AddBoardGameFormScreen: View {
                     }
                 }
 
-                // MARK: Basic Info
+               
                 Section("Info") {
                     TextField("Game name *", text: $name)
                     TextField("One-liner tagline", text: $oneLiner)
                 }
 
-                // MARK: Description
+               
                 Section("Description") {
                     TextEditor(text: $desc)
                         .frame(minHeight: 80)
                 }
 
-                // MARK: Players
+                
                 Section("Players") {
                     Stepper("Min: \(minPlayers)", value: $minPlayers, in: 1...maxPlayers)
                     Stepper("Max: \(maxPlayers)", value: $maxPlayers, in: minPlayers...20)
                 }
 
-                // MARK: Play Time
+                
                 Section("Play time") {
                     Stepper("Min: \(minPlayTime) min", value: $minPlayTime, in: 5...maxPlayTime, step: 5)
                     Stepper("Max: \(maxPlayTime) min", value: $maxPlayTime, in: minPlayTime...600, step: 5)
                 }
 
-                // MARK: Genre
+                
                 Section("Genre") {
                     Button {
                         showGenrePicker = true
@@ -113,7 +109,7 @@ struct AddBoardGameFormScreen: View {
                     }
                 }
 
-                // MARK: Complexity
+               
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
@@ -166,7 +162,7 @@ struct AddBoardGameFormScreen: View {
         }
     }
 
-    // MARK: – Helpers
+    
 
     private var complexityColor: Color {
         switch complexity {
@@ -182,7 +178,6 @@ struct AddBoardGameFormScreen: View {
               let data = try? await item.loadTransferable(type: Data.self),
               let uiImage = UIImage(data: data) else { return }
 
-        // Save to documents directory
         let filename = UUID().uuidString + ".jpg"
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(filename)
@@ -212,7 +207,7 @@ struct AddBoardGameFormScreen: View {
     }
 }
 
-// MARK: – Genre Picker Sheet
+
 
 private struct GenrePickerSheet: View {
     @Binding var selectedGenres: Set<Genre>

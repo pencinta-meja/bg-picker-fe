@@ -75,11 +75,11 @@ struct MyGamesScreen: View {
         }
     }
 
-    // MARK: – Game List
+   
 
     private var gameListView: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            VStack(spacing: 12) {
                 ForEach(viewModel.games) { game in
                     GameRowCard(game: game)
                 }
