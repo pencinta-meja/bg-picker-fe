@@ -1,48 +1,42 @@
+//
+//  PreferenceViewModel.swift
+//  bg-picker
+//
+
 import SwiftUI
 import Combine
-
+import SwiftData
 
 class PreferenceViewModel: ObservableObject {
-    @ObservedObject private var networkManager = NetworkManager.shared
+
+    private let games: [BoardGame]
+
+    init(games: [BoardGame]) {
+        self.games = games
+    }
 
     func getAllMechanics(completion: @escaping ([Mechanic]) -> ()) {
-        networkManager.get(endpoint: "http://187.77.115.63/boardgame/room/\(RoomManager.shared.id!)/mechanics") { (response: GetBoardgameMechanicsResponseDto?) in
-            DispatchQueue.main.async {
-                if let response = response {
-                    let mechanics = response.mechanics.compactMap { Mechanic.fromString($0) }
-                    completion(mechanics)
-                } else {
-                    print("Failed to fetch mechanics")
-                    completion([])
-                }
-            }
-        }
+        completion(Mechanic.allCases)
     }
-    
+
     func selectedMechanics(selectedMechanics: Set<Mechanic>, completion: @escaping (Bool) -> ()) {
-        let userId = UserManager.shared.id ?? ""
-        let roomId = RoomManager.shared.id ?? ""
-        
-        let mechanics = selectedMechanics.map { $0.rawValue }
-        
-        let payload: [String: Any] = ["mechanics": mechanics]
-        
-        guard let payloadData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-            print("Failed to serialize data")
-            completion(false)
-            return
+        // Convert the user's saved BoardGame collection → BoardgameDto for the swipe engine
+        let dtos: [BoardgameDto] = games.map { game in
+            BoardgameDto(
+                id: game.persistentModelID.hashValue.description,
+                name: game.name,
+                cover_image_path: game.thumbnailPath ?? "",
+                gameplay_image_path: game.gameplayImagePath ?? "",
+                description: game.desc,
+                complexity: game.complexity,
+                minPlayers: game.minPlayers,
+                maxPlayers: game.maxPlayers,
+                minDuration: game.minPlayingTime,
+                maxDuration: game.maxPlayingTime
+            )
         }
-        
-        let endpoint = "http://187.77.115.63/user/\(userId)/room/\(roomId)/mechanics"
-        
-        networkManager.post(endpoint: endpoint, payload: payloadData) { (response: GenerateSwipeListResponseDto?) in
-            if let response = response {
-                SwipeManager.shared.saveSwipeList(response.boardgames)
-                completion(true)
-            } else {
-                print("Failed to save mechanics")
-                completion(false)
-            }
-        }
+
+        SwipeManager.shared.saveSwipeList(dtos)
+        completion(true)
     }
 }

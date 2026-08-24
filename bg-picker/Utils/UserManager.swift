@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import Combine
 
-final class UserManager {
+final class UserManager: ObservableObject {
     
     static let shared = UserManager()
     private init() {}
@@ -30,25 +31,15 @@ final class UserManager {
         set { defaults.set(newValue, forKey: Keys.id) }
     }
     
-    var isNameSet: Bool {
-        get { defaults.bool(forKey: Keys.isNameSet) }
-        set { defaults.set(newValue, forKey: Keys.isNameSet)}
+    @Published var isNameSet: Bool = UserDefaults.standard.bool(forKey: "is_name_set") {
+        didSet { defaults.set(isNameSet, forKey: Keys.isNameSet) }
     }
     
-    func saveName(name: String) {
-        self.name = name
-    }
-    
-    func saveId (id: String) {
-        self.id = id
-    }
-    
+    func saveName(name: String) { self.name = name }
+    func saveId(id: String) { self.id = id }
     func clearSession() {
         self.name = "Anonymous"
         self.id = nil
     }
-    
-    func isIdSet() -> Bool {
-        return self.id != nil
-    }
+    func isIdSet() -> Bool { return self.id != nil }
 }

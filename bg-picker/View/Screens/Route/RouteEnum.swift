@@ -12,4 +12,5 @@ enum Route: Hashable {
     case mechanicPreference
     case swiping
     case podium
+    case myGames
 }

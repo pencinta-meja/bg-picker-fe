@@ -2,27 +2,36 @@
 //  bg_pickerApp.swift
 //  bg-picker
 //
-//  Created by Danniel on 02/05/26.
-//
 
 import SwiftUI
+import SwiftData
 
 @main
 struct bg_pickerApp: App {
+    let container: ModelContainer = {
+        let schema = Schema([BoardGame.self]) 
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        return try! ModelContainer(for: schema, configurations: config)
+    }()
+
     var body: some Scene {
         WindowGroup {
+            let viewModel = CollectionViewModel(    modelContext: container.mainContext)
             FirstScreen()
+                .environment(viewModel)
+                .modelContainer(container)
         }
     }
 }
 
 struct FirstScreen: View {
-    @State var isNameSet : Bool = UserManager.shared.isNameSet
+    @ObservedObject var userManager = UserManager.shared
+
     var body: some View {
-        if !isNameSet {
-            SetNameScreen(goToLobby: $isNameSet)
-        } else {
+        if userManager.isNameSet {
             LobbyScreen().transition(.opacity)
+        } else {
+            SetNameScreen(goToLobby: $userManager.isNameSet)
         }
     }
 }
