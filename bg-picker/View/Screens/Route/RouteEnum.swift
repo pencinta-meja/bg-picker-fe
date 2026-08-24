@@ -6,11 +6,7 @@
 //
 
 enum Route: Hashable {
-    case roomSetting
-    case pinInput
-    case waitingRoom
     case mechanicPreference
     case swiping
     case podium
-    case myGames
 }

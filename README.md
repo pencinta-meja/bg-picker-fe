@@ -1,22 +1,30 @@
-## Struktur Board Game Picker Repository (SwiftUI)
+# Board Game Picker
 
-### Model 
-Semua mengenai template/struktur data akan diletak pada direktori ini
+Board Game Picker is a SwiftUI iOS app for helping a group agree on a board game. This repository is currently a UI-only shell while its previous backend and local database architecture are replaced.
 
-- RemoteModel akan berisi struct/class yang menyimpan data yang diambil dari BE server
-Cek this: [How to use Decodable to turn Json into Struct type](https://www.youtube.com/watch?v=LoRhAEf050E)
+## Current state
 
-- Entities akan berisi struct/class yang hanya dipergunakan dalam ranah aplikasi saja (Tidak terintegrasi dengan BE)
+- The app launches into a Create Room / Join Room lobby.
+- Matchmaking actions are intentionally disabled until GameKit is integrated.
+- Preference, swipe-card, detail, and podium UI remain available as reusable presentation code.
+- Swipe state is transient and starts with an empty list.
+- There is no backend client, local database, bundled CSV, persistent cache, or fallback game catalog.
 
-### View
-Screen & Component disimpan disini. Semua yang berhubungan dengan View. 
+## Planned integrations
 
-- Screen mendefinisikan 1 screen, beri nama yang baik dengan suffix Screen seperti HomeScreen, HostScreen, etc
+### GameKit
 
-- Component mendefinisikan komponen yang sering dipakai. Misalnya button, anda bisa mendefinisikan custom function yang mengenerate button dengan parameter yang dapat di ubah-ubah sesuai kebutuhan
+Game Center will provide player identity, internet matchmaking, invitations, match lifecycle, and peer-to-peer session messages. Native Game Center invitations will replace the old custom room-code flow.
 
-### Design System
-Untuk sementara, typography saja yang masuk disini. Untuk color dan image bisa dimasukkan ke asset Xcode dulu :3
+### BoardGameGeek
 
-### Services & & Networking
-WebSocket, guest session, room logic (We will se as we fck up)
+The host will load a public BoardGameGeek collection through its XML API. Collection data will remain in memory for the active session and will be shared with matched players through GameKit.
+
+BoardGameGeek API registration and token handling must be designed before this integration is added. No API token belongs in source control.
+
+## Project structure
+
+- `Model`: backend-independent presentation/domain values.
+- `View`: SwiftUI screens and reusable components.
+- `ViewModel`: transient screen state only.
+- `Utils`: platform helpers such as haptic feedback.

@@ -19,7 +19,7 @@ struct SwipeScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Text("\(UserManager.shared.name)'s Room")
+                Text("Room")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.top, 70)
@@ -47,6 +47,8 @@ struct SwipeScreen: View {
                         .background(Color(red: 0.93, green: 0.88, blue: 0.99))
                         .clipShape(Capsule())
                 }
+                .disabled(!viewModel.canFinish)
+                .opacity(viewModel.canFinish ? 1 : 0.55)
                 .padding(.horizontal, 34)
                 .padding(.bottom, 40)
             }
@@ -54,9 +56,8 @@ struct SwipeScreen: View {
     }
 
     private func finishSwiping() {
-        viewModel.finishRoom {
-            path.append(Route.podium)
-        }
+        guard viewModel.canFinish else { return }
+        path.append(Route.podium)
     }
 }
 

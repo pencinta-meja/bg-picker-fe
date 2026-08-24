@@ -63,5 +63,5 @@ struct PodiumCard: View {
     
 
 #Preview {
-    PodiumCard(title: "All Matches", images: ["background","background","background", "background"])
+    PodiumCard(title: "Results", images: [])
 }

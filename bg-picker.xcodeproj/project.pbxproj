@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		FB982CBA2FA9BBCB00984698 /* ConfidentialKit in Frameworks */ = {isa = PBXBuildFile; productRef = FB982CB92FA9BBCB00984698 /* ConfidentialKit */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "bg-picker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -40,7 +36,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB982CBA2FA9BBCB00984698 /* ConfidentialKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,14 +72,12 @@
 			buildRules = (
 			);
 			dependencies = (
-				FB982CCC2FA9C04D00984698 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FB51725C2FA5FD5D00DF0C85 /* bg-picker */,
 			);
 			name = "bg-picker";
 			packageProductDependencies = (
-				FB982CB92FA9BBCB00984698 /* ConfidentialKit */,
 			);
 			productName = "bg-picker";
 			productReference = FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */;
@@ -115,8 +108,6 @@
 			mainGroup = FB5172512FA5FD5D00DF0C85;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FB982CB82FA9BBCB00984698 /* XCRemoteSwiftPackageReference "swift-confidential" */,
-				FB982CBB2FA9BC0900984698 /* XCRemoteSwiftPackageReference "swift-confidential-plugin" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FB51725B2FA5FD5D00DF0C85 /* Products */;
@@ -147,13 +138,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		FB982CCC2FA9C04D00984698 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = FB982CCB2FA9C04D00984698 /* Confidential */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		FB5172632FA5FD5E00DF0C85 /* Debug */ = {
@@ -283,7 +267,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UA4NHY4TLQ;
+				DEVELOPMENT_TEAM = UJKQG8X642;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "bg-picker/Info.plist";
@@ -298,7 +282,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "danniel.bg-picker";
+				PRODUCT_BUNDLE_IDENTIFIER = "matthew.bg-picker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -319,7 +303,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UA4NHY4TLQ;
+				DEVELOPMENT_TEAM = UJKQG8X642;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "bg-picker/Info.plist";
@@ -334,7 +318,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "danniel.bg-picker";
+				PRODUCT_BUNDLE_IDENTIFIER = "matthew.bg-picker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -369,38 +353,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		FB982CB82FA9BBCB00984698 /* XCRemoteSwiftPackageReference "swift-confidential" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/securevale/swift-confidential.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.2;
-			};
-		};
-		FB982CBB2FA9BC0900984698 /* XCRemoteSwiftPackageReference "swift-confidential-plugin" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/securevale/swift-confidential-plugin.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.2;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		FB982CB92FA9BBCB00984698 /* ConfidentialKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FB982CB82FA9BBCB00984698 /* XCRemoteSwiftPackageReference "swift-confidential" */;
-			productName = ConfidentialKit;
-		};
-		FB982CCB2FA9C04D00984698 /* Confidential */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FB982CBB2FA9BC0900984698 /* XCRemoteSwiftPackageReference "swift-confidential-plugin" */;
-			productName = "plugin:Confidential";
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FB5172522FA5FD5D00DF0C85 /* Project object */;
 }
