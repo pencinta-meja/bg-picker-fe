@@ -6,12 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FBFA262430475D1900AE268D /* XMLCoder in Frameworks */ = {isa = PBXBuildFile; productRef = FBFA262330475D1900AE268D /* XMLCoder */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "bg-picker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		FBDB54B92FA8E22E008540E8 /* Exceptions for "bg-picker" folder in "bg-picker" target */ = {
+		FB79637B30475A61000B530C /* Exceptions for "bg-picker" folder in "bg-picker" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +28,7 @@
 		FB51725C2FA5FD5D00DF0C85 /* bg-picker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				FBDB54B92FA8E22E008540E8 /* Exceptions for "bg-picker" folder in "bg-picker" target */,
+				FB79637B30475A61000B530C /* Exceptions for "bg-picker" folder in "bg-picker" target */,
 			);
 			path = "bg-picker";
 			sourceTree = "<group>";
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBFA262430475D1900AE268D /* XMLCoder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = "bg-picker";
 			packageProductDependencies = (
+				FBFA262330475D1900AE268D /* XMLCoder */,
 			);
 			productName = "bg-picker";
 			productReference = FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */;
@@ -113,6 +119,7 @@
 			mainGroup = FB5172512FA5FD5D00DF0C85;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FB51725B2FA5FD5D00DF0C85 /* Products */;
@@ -273,7 +280,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UJKQG8X642;
+				DEVELOPMENT_TEAM = XC4BM85HNK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "bg-picker/Info.plist";
@@ -288,7 +295,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "matthew.bg-picker";
+				PRODUCT_BUNDLE_IDENTIFIER = "danniel.bg-picker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -310,7 +317,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = UJKQG8X642;
+				DEVELOPMENT_TEAM = XC4BM85HNK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "bg-picker/Info.plist";
@@ -325,7 +332,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "matthew.bg-picker";
+				PRODUCT_BUNDLE_IDENTIFIER = "danniel.bg-picker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -360,6 +367,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CoreOffice/XMLCoder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.18.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FBFA262330475D1900AE268D /* XMLCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */;
+			productName = XMLCoder;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FB5172522FA5FD5D00DF0C85 /* Project object */;
 }
