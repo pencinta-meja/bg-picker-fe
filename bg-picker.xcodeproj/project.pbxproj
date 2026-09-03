@@ -154,6 +154,8 @@
 /* Begin XCBuildConfiguration section */
 		FB5172632FA5FD5E00DF0C85 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -217,6 +219,8 @@
 		};
 		FB5172642FA5FD5E00DF0C85 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -273,6 +277,8 @@
 		};
 		FB5172662FA5FD5E00DF0C85 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -310,6 +316,8 @@
 		};
 		FB5172672FA5FD5E00DF0C85 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

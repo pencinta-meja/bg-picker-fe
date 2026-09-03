@@ -53,7 +53,7 @@ actor BGGService {
     // Get this from https://boardgamegeek.com/applications after registering
     // and creating a Token for your application. BGG now requires every XML
     // API request to carry this as a Bearer token.
-    private let appToken = Secrets.apiKey
+    private let appToken = SecretVariables.apiKey
 
     private func makeRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
