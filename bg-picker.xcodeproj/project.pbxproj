@@ -6,12 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FBFA262430475D1900AE268D /* XMLCoder in Frameworks */ = {isa = PBXBuildFile; productRef = FBFA262330475D1900AE268D /* XMLCoder */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "bg-picker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		FBDB54B92FA8E22E008540E8 /* Exceptions for "bg-picker" folder in "bg-picker" target */ = {
+		FB79637B30475A61000B530C /* Exceptions for "bg-picker" folder in "bg-picker" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +28,7 @@
 		FB51725C2FA5FD5D00DF0C85 /* bg-picker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				FBDB54B92FA8E22E008540E8 /* Exceptions for "bg-picker" folder in "bg-picker" target */,
+				FB79637B30475A61000B530C /* Exceptions for "bg-picker" folder in "bg-picker" target */,
 			);
 			path = "bg-picker";
 			sourceTree = "<group>";
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBFA262430475D1900AE268D /* XMLCoder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = "bg-picker";
 			packageProductDependencies = (
+				FBFA262330475D1900AE268D /* XMLCoder */,
 			);
 			productName = "bg-picker";
 			productReference = FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */;
@@ -113,6 +119,7 @@
 			mainGroup = FB5172512FA5FD5D00DF0C85;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FB51725B2FA5FD5D00DF0C85 /* Products */;
@@ -147,6 +154,8 @@
 /* Begin XCBuildConfiguration section */
 		FB5172632FA5FD5E00DF0C85 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -210,6 +219,8 @@
 		};
 		FB5172642FA5FD5E00DF0C85 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -266,13 +277,16 @@
 		};
 		FB5172662FA5FD5E00DF0C85 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "bg-picker/bg-picker.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = UJKQG8X642;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -303,13 +317,16 @@
 		};
 		FB5172672FA5FD5E00DF0C85 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
+			baseConfigurationReferenceRelativePath = Credentials/Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "bg-picker/bg-picker.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = UJKQG8X642;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -360,6 +377,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CoreOffice/XMLCoder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.18.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FBFA262330475D1900AE268D /* XMLCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBFA262230475D1900AE268D /* XCRemoteSwiftPackageReference "XMLCoder" */;
+			productName = XMLCoder;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FB5172522FA5FD5D00DF0C85 /* Project object */;
 }
