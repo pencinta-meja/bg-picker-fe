@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Symbol.png",
+      "filename" : "Image-Hero.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "Image-Hero 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "Image-Hero 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

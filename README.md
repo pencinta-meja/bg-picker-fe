@@ -4,10 +4,15 @@ Board Game Picker is a SwiftUI iOS app for helping a group agree on a board game
 
 ## Current state
 
-- The app launches into a working Create Room / Join Room lobby.
+- The app launches into a four-screen room setup flow: Lobby, Collection Link,
+  Room Code Join, and Preference/Waiting Room.
 - Game Center party codes and party URLs connect 2–6 players without an application backend.
-- Hosts can share a room code, QR code, or system share link.
-- Guests can type the room code or scan the QR with the iPhone Camera app.
+- Hosts enter an HTTPS BoardGameGeek collection URL before creating a room. The
+  URL is retained only in memory; this phase does not fetch the collection.
+- Guests join with one native, paste-friendly party-code field. The QR affordance
+  on the Join screen is intentionally noninteractive; scanning is not implemented.
+- The Preference screen displays the live party code, locally generated QR image,
+  connected-player count, and optional in-memory mechanic choices.
 - Preference, swipe-card, detail, and podium UI remain available as reusable presentation code.
 - Swipe state is transient and starts with an empty list.
 - There is no backend client, local database, bundled CSV, persistent cache, or fallback game catalog.
@@ -25,19 +30,19 @@ Game Center provides player identity, party-code matchmaking, match lifecycle, a
 - Observe `partyCode`, `partyURL`, `players`, `matchState`, `statusMessage`, and `receivedPackets`, or set `onPacketReceived` for event-driven handling.
 - Call `disconnect()` when the room ends.
 
-The room console supports QR/link sharing, connected-player inspection, and reliable-message testing. QR images are generated locally with Core Image; no QR package is required.
+Room QR images are generated locally with Core Image; no QR package is required.
 
 #### App Store Connect setup
 
 The application cannot load a room definition until its Game Center configuration contains a matching Game Activity:
 
 1. Enable Game Center for the app identifier and target.
-2. In App Store Connect, create a Game Activity with identifier `board-game-room`.
+2. In App Store Connect, create a Game Activity with identifier `boardgameroom`.
 3. Enable party-code support, select synchronous play, and configure 2 minimum and 6 maximum players.
 4. Make the activity available for the build being tested.
 5. Test matchmaking on two Game Center-enabled devices or supported test accounts.
 
-If this setup is missing, the lobby intentionally reports that `board-game-room` is unavailable instead of simulating a room.
+If this setup is missing, the lobby intentionally reports that `boardgameroom` is unavailable instead of simulating a room.
 
 ### Planned BoardGameGeek integration
 
@@ -47,7 +52,9 @@ BoardGameGeek API registration and token handling must be designed before this i
 
 ## Project structure
 
-- `Model`: backend-independent presentation/domain values.
-- `View`: SwiftUI screens and reusable components.
-- `ViewModel`: transient screen state only.
+- `Models`: backend-independent presentation/domain values.
+- `Services`: platform boundaries, including `GameKitManager`.
+- `UI/CommonComponents`: reusable visual components and the shared app background.
+- `UI/Screens/RoomSetup`: the four room-setup screens.
+- `UI/Screens/SwipeScreen`: swipe UI and transient swipe state.
 - `Utils`: platform helpers such as haptic feedback.

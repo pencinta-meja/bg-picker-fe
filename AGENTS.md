@@ -16,11 +16,11 @@ Game Center owns player authentication, party-code matchmaking, match lifecycle,
 ## Source Layout
 
 - `bg-picker/Services`: platform integration boundaries, currently `GameKitManager`.
-- `bg-picker/Model`: backend-independent domain and presentation values.
-- `bg-picker/View`: SwiftUI screens and reusable components.
-- `bg-picker/ViewModel`: transient, in-memory screen state.
+- `bg-picker/Models`: backend-independent domain and presentation values.
+- `bg-picker/UI/CommonComponents`: shared SwiftUI components.
+- `bg-picker/UI/Screens`: feature-organized SwiftUI screens and transient view models.
 - `bg-picker/Utils`: platform helpers such as haptics.
-- `bg-picker/Assets.xcassets`: app colors, icons, and images.
+- `bg-picker/Resources/Images.xcassets`: app colors, icons, and images.
 
 The Xcode project uses a file-system-synchronized root group. New Swift files placed inside `bg-picker/` are normally discovered automatically and should not require manual `project.pbxproj` source entries.
 
@@ -36,7 +36,7 @@ The manager currently provides:
 - `send(_:type:reliably:)` for typed match packets.
 - `disconnect()` for ending the transient room session.
 
-The required Game Activity identifier is `board-game-room`. It must be configured in App Store Connect with party-code support, synchronous play, and a 2–6 player range.
+The required Game Activity identifier is `boardgameroom`. It must be configured in App Store Connect with party-code support, synchronous play, and a 2–6 player range.
 
 Do not reintroduce `GKMatchmakerViewController`, custom server room IDs, or backend matchmaking unless the product requirements explicitly change.
 
