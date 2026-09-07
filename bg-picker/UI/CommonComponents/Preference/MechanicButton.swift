@@ -2,8 +2,8 @@ import SwiftUI
 
 struct MechanicButton: View {
     let title: String
+    let isSelected: Bool
     let action: () -> Void
-    @State private var isClicked = false
     
     private let purpleColor = Color(
         red: 88.0 / 255.0,
@@ -11,39 +11,36 @@ struct MechanicButton: View {
         blue: 130.0 / 255.0
     )
     var body: some View {
-        Button(action: {
-          isClicked.toggle()
-          action()
-        }) {
+        Button(action: action) {
             HStack(spacing: 8) {
                 Text(title)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(isClicked ? purpleColor : .white)
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(isSelected ? purpleColor : .white)
+                    .minimumScaleFactor(0.75)
+                    .lineLimit(2)
                 
                 Circle()
-                    .fill(isClicked ? purpleColor : .white)
+                    .fill(isSelected ? purpleColor : .white)
                     .frame(width: 20, height: 20)
                     .overlay {
-                        Image(systemName: isClicked ? "xmark" : "plus")
+                        Image(systemName: isSelected ? "xmark" : "plus")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(isClicked ? .white : purpleColor)
+                            .foregroundStyle(isSelected ? .white : purpleColor)
                     }
             }
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            .frame(height: 40)
+            .padding(.horizontal, 14)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
         }
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(isClicked ? .white : .clear)
+                .fill(isSelected ? .white : .clear)
         )
         .glassEffect(
-            isClicked ? .regular.interactive() : .regular,
+            isSelected ? .regular.interactive() : .regular,
             in: RoundedRectangle(cornerRadius: 10)
         )
-
-            
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }
