@@ -141,7 +141,7 @@ private struct PartyCodeField: View {
                 }
             }
 
-            TextField("Room code", text: $code)
+            TextField("", text: $code)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .keyboardType(.asciiCapable)
