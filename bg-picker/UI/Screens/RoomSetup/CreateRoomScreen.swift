@@ -2,7 +2,8 @@ import SwiftUI
 
 struct CreateRoomScreen: View {
     @ObservedObject var gameKitManager: GameKitManager
-    @Binding var collectionLink: String
+    @ObservedObject var store: SessionGameStore = .shared
+    @Binding var geeklistLink: String
 
     @State private var hasAttemptedSubmission = false
     @FocusState private var linkFieldFocused: Bool
@@ -14,12 +15,12 @@ struct CreateRoomScreen: View {
                     VStack(spacing: 0) {
                         Spacer(minLength: 180)
 
-                        Text("Input Collection Link")
+                        Text("Input Geeklist Link")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
 
-                        collectionField
+                        geeklistField
                             .padding(.top, 44)
 
                         validationMessage
@@ -44,16 +45,16 @@ struct CreateRoomScreen: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
-            linkFieldFocused = collectionLink.isEmpty
+            linkFieldFocused = geeklistLink.isEmpty
         }
-        .onChange(of: collectionLink) { _, _ in
+        .onChange(of: geeklistLink) { _, _ in
             hasAttemptedSubmission = false
         }
     }
 
-    private var collectionField: some View {
+    private var geeklistField: some View {
         HStack(spacing: 12) {
-            TextField("BoardGameGeek collection URL", text: $collectionLink)
+            TextField("BoardGameGeek geeklist URL", text: $geeklistLink)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.URL)
@@ -62,11 +63,11 @@ struct CreateRoomScreen: View {
                 .focused($linkFieldFocused)
                 .onSubmit(createRoom)
 
-            Image(systemName: validCollectionURL == nil
+            Image(systemName: validGeeklistURL == nil
                 ? "checkmark.circle"
                 : "checkmark.circle.fill")
                 .font(.title)
-                .foregroundStyle(validCollectionURL == nil ? .white.opacity(0.35) : .green)
+                .foregroundStyle(validGeeklistURL == nil ? .white.opacity(0.35) : .green)
                 .accessibilityHidden(true)
         }
         .font(.body)
@@ -81,7 +82,7 @@ struct CreateRoomScreen: View {
     private var validationMessage: some View {
         if shouldShowURLValidationError {
             Label(
-                "Enter a valid HTTPS BoardGameGeek URL.",
+                "Enter a BoardGameGeek geeklist URL, e.g. boardgamegeek.com/geeklist/331207",
                 systemImage: "exclamationmark.circle.fill"
             )
             .font(.footnote)
@@ -111,25 +112,26 @@ struct CreateRoomScreen: View {
         }
     }
 
-    private var validCollectionURL: URL? {
-        let trimmed = collectionLink.trimmingCharacters(in: .whitespacesAndNewlines)
+    private var validGeeklistURL: URL? {
+        let trimmed = geeklistLink.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let components = URLComponents(string: trimmed),
               components.scheme?.lowercased() == "https",
               let host = components.host?.lowercased(),
               host == "boardgamegeek.com" || host.hasSuffix(".boardgamegeek.com"),
-              let url = components.url else {
+              let url = components.url,
+              BGGService.geeklistID(from: url) != nil else {
             return nil
         }
         return url
     }
 
     private var shouldShowURLValidationError: Bool {
-        let hasInput = !collectionLink.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return validCollectionURL == nil && (hasAttemptedSubmission || hasInput)
+        let hasInput = !geeklistLink.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return validGeeklistURL == nil && (hasAttemptedSubmission || hasInput)
     }
 
     private var canCreateRoom: Bool {
-        validCollectionURL != nil
+        validGeeklistURL != nil
             && gameKitManager.isAuthenticated
             && gameKitManager.isActivityReady
             && !gameKitManager.hasActiveRoom
@@ -137,10 +139,13 @@ struct CreateRoomScreen: View {
 
     private func createRoom() {
         hasAttemptedSubmission = true
-        guard let url = validCollectionURL, canCreateRoom else { return }
+        guard let url = validGeeklistURL,
+              let listID = BGGService.geeklistID(from: url),
+              canCreateRoom else { return }
 
         linkFieldFocused = false
-        collectionLink = url.absoluteString
+        geeklistLink = url.absoluteString
+        store.load(geeklistID: listID)
         gameKitManager.createRoom()
     }
 }
@@ -149,7 +154,8 @@ struct CreateRoomScreen: View {
     NavigationStack {
         CreateRoomScreen(
             gameKitManager: .shared,
-            collectionLink: .constant("")
+            store: SessionGameStore(),
+            geeklistLink: .constant("")
         )
     }
 }

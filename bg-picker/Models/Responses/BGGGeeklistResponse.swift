@@ -5,10 +5,13 @@
 
 nonisolated struct BGGGeeklistResponse: Codable {
     let title: String?
-    let items: [BGGGeeklistItem]
+    /// Optional so an empty geeklist decodes to no entries rather than throwing.
+    private let item: [BGGGeeklistItem]?
+
+    var items: [BGGGeeklistItem] { item ?? [] }
 
     enum CodingKeys: String, CodingKey {
         case title
-        case items = "item"
+        case item
     }
 }

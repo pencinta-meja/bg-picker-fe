@@ -4,7 +4,7 @@ struct LobbyScreen: View {
     @ObservedObject var gameKitManager: GameKitManager
 
     @State private var path = NavigationPath()
-    @State private var collectionLink = ""
+    @State private var geeklistLink = ""
     @State private var selectedMechanics: Set<Mechanic> = []
 
     var body: some View {
@@ -40,6 +40,15 @@ struct LobbyScreen: View {
                             }
                             .disabled(!canEnterRoomSetup)
 
+                            #if DEBUG
+                            NavigationLink("Geeklist test (debug)") {
+                                GeeklistTestScreen()
+                            }
+                            .font(.footnote.bold())
+                            .foregroundStyle(.white.opacity(0.75))
+                            .padding(.top, 20)
+                            #endif
+
                             if shouldShowGameCenterStatus {
                                 gameCenterStatus
                                     .padding(.top, 18)
@@ -60,7 +69,7 @@ struct LobbyScreen: View {
                 case .createRoom:
                     CreateRoomScreen(
                         gameKitManager: gameKitManager,
-                        collectionLink: $collectionLink
+                        geeklistLink: $geeklistLink
                     )
                 case .joinRoom:
                     JoinRoomScreen(gameKitManager: gameKitManager)
@@ -147,7 +156,8 @@ struct LobbyScreen: View {
         if gameKitManager.hasActiveRoom {
             gameKitManager.disconnect()
         }
-        collectionLink = ""
+        geeklistLink = ""
+        SessionGameStore.shared.clear()
         selectedMechanics.removeAll()
     }
 }

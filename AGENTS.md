@@ -11,15 +11,17 @@ The project intentionally has:
 - No bundled CSV catalog, persistent cache, or fallback game data.
 - No fake users, rooms, matches, or results in production paths.
 
-Game Center owns player authentication, party-code matchmaking, match lifecycle, and peer-to-peer messages. BoardGameGeek collection loading is planned but is not implemented yet.
+Game Center owns player authentication, party-code matchmaking, match lifecycle, and peer-to-peer messages. BoardGameGeek **geeklist** loading is implemented in `BGGService`: one pull for the geeklist, a second batched pull through `/thing?stats=1` for the details the cards display. Collection loading is not implemented and is not planned.
 
 ## Source Layout
 
-- `bg-picker/Services`: platform integration boundaries, currently `GameKitManager`.
+- `bg-picker/Services`: platform integration boundaries — `GameKitManager` and `BGGService`.
 - `bg-picker/Models`: backend-independent domain and presentation values.
 - `bg-picker/UI/CommonComponents`: shared SwiftUI components.
 - `bg-picker/UI/Screens`: feature-organized SwiftUI screens and transient view models.
+- `bg-picker/Stores`: in-memory session state shared across screens, cleared when a room ends.
 - `bg-picker/Utils`: platform helpers such as haptics.
+- `bg-picker/ViewTest`: `#if DEBUG` harnesses only. Nothing here ships in Release.
 - `bg-picker/Resources/Images.xcassets`: app colors, icons, and images.
 
 The Xcode project uses a file-system-synchronized root group. New Swift files placed inside `bg-picker/` are normally discovered automatically and should not require manual `project.pbxproj` source entries.
@@ -45,6 +47,8 @@ QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Im
 ## Implementation Rules
 
 - Keep session data transient and in memory.
+- Fetched session data belongs in a store under `bg-picker/Stores`, reached through its `.shared` instance. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
+- Give stores an internal `init()` alongside `.shared` so previews and tests can use an isolated instance.
 - Keep networking and platform APIs behind focused service types.
 - Keep SwiftUI views declarative; move lifecycle and matchmaking decisions into `GameKitManager`.
 - Represent loading, unavailable, empty, waiting, connected, cancelled, and failure states honestly.
@@ -55,6 +59,8 @@ QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Im
 - Never commit credentials, API tokens, provisioning profiles, or developer-specific account data.
 
 ## Build and Verification
+
+Signing is per developer. `PRODUCT_BUNDLE_IDENTIFIER` and `DEVELOPMENT_TEAM` are not hard-coded in `project.pbxproj`; they resolve from `MY_BUNDLE_ID` and `MY_DEVELOPMENT_TEAM` in the untracked `bg-picker/Credentials/Secrets.xcconfig`. Do not reintroduce literal bundle identifiers or team IDs into the project file — the contributors hold separate Individual memberships, and a hard-coded App ID breaks signing for everyone but its owner. See the documentation catalog for setup.
 
 The selected command-line developer directory may point at Command Line Tools instead of Xcode. Set `DEVELOPER_DIR` for command-line builds:
 

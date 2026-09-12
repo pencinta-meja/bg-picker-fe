@@ -1,5 +1,5 @@
 //
-//  BGGError.swift
+//  BGGService.swift
 //  bg-picker
 //
 //  Created by Danniel on 02/09/26.
@@ -55,27 +55,29 @@ actor BGGService {
     // API request to carry this as a Bearer token.
     private let appToken = SecretVariables.apiKey
 
+    /// The most ids /thing accepts in a single request.
+    private static let batchSize = 20
+    private static let retryLimit = 4
+    /// How long to wait before re-asking for something BGG answered 202 for.
+    private static let queuedRetryDelay: Duration = .milliseconds(1500)
+    /// Breathing room between batches — BGG rate-limits bursts aggressively.
+    private static let batchPause: Duration = .milliseconds(700)
+
+    // MARK: - Request plumbing
+
     private func makeRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.setValue("Bearer \(appToken)", forHTTPHeaderField: "Authorization")
         return request
     }
 
-    // MARK: thing
-    func fetchGame(id: String) async throws -> BGGItem {
-        guard var components = URLComponents(string: "\(baseURL)/thing") else {
-            throw BGGError.invalidURL
-        }
-        components.queryItems = [
-            URLQueryItem(name: "id", value: id),
-            URLQueryItem(name: "stats", value: "1")
-        ]
-        guard let url = components.url else { throw BGGError.invalidURL }
+    /// BGG answers 202 ("queued") while it prepares data for something it hasn't
+    /// served recently — both /thing and /geeklist do this — so every endpoint needs
+    /// the same wait-and-retry. It lives here once rather than at each call site.
+    private func fetch<T: Decodable>(_ type: T.Type, from url: URL) async throws -> T {
         let request = makeRequest(url: url)
 
-        // BGG's /thing endpoint can briefly 202 ("please wait") while it prepares
-        // data for an ID it hasn't served recently, so we retry a few times.
-        for _ in 0..<4 {
+        for _ in 0..<Self.retryLimit {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse else {
                 throw BGGError.invalidResponse(statusCode: -1, body: nil)
@@ -83,101 +85,118 @@ actor BGGService {
 
             switch http.statusCode {
             case 200:
-                let result = try decoder.decode(BGGThingResponse.self, from: data)
-                guard let item = result.items.first else { throw BGGError.noResults }
-                return item
+                return try decoder.decode(type, from: data)
             case 202:
-                try await Task.sleep(nanoseconds: 1_500_000_000)
+                try await Task.sleep(for: Self.queuedRetryDelay)
             default:
-                throw BGGError.invalidResponse(statusCode: http.statusCode, body: String(data: data, encoding: .utf8))
+                throw BGGError.invalidResponse(
+                    statusCode: http.statusCode,
+                    body: String(data: data, encoding: .utf8)
+                )
             }
         }
+
         throw BGGError.invalidResponse(statusCode: 202, body: "Still queued after several retries.")
     }
 
-    // MARK: Fetch Geek List
+    // MARK: - Geeklist
+
     func fetchGeeklist(id: String) async throws -> BGGGeeklistResponse {
         guard let url = URL(string: "\(geeklistBaseURL)/\(id)") else {
             throw BGGError.invalidURL
         }
-        let request = makeRequest(url: url)
-
-        // Like /thing, an infrequently-viewed geeklist can queue on BGG's end
-        // and return 202 while it's prepared, so we retry a few times.
-        for _ in 0..<4 {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse else {
-                throw BGGError.invalidResponse(statusCode: -1, body: nil)
-            }
-
-            switch http.statusCode {
-            case 200:
-                return try decoder.decode(BGGGeeklistResponse.self, from: data)
-            case 202:
-                try await Task.sleep(nanoseconds: 1_500_000_000)
-            default:
-                throw BGGError.invalidResponse(statusCode: http.statusCode, body: String(data: data, encoding: .utf8))
-            }
-        }
-        throw BGGError.invalidResponse(statusCode: 202, body: "Still queued after several retries.")
+        return try await fetch(BGGGeeklistResponse.self, from: url)
     }
 
-    // MARK: Ambil Thumbnail
-    /// Fetches thumbnail URLs for a set of thing ids, keyed by id. /search and
-    /// /xmlapi/geeklist don't return images themselves, so callers use this
-    /// to enrich list rows after the fact. Batches into groups of 20, since
-    /// that's the max /thing accepts per request.
-    func fetchThumbnails(ids: [String]) async throws -> [String: String] {
-        guard !ids.isEmpty else { return [:] }
-        var result: [String: String] = [:]
-        for batch in ids.chunked(into: 20) {
-            let batchResult = try await fetchThumbnailBatch(ids: batch)
-            result.merge(batchResult) { current, _ in current }
-        }
-        return result
+    /// The two-pull flow the swipe deck is built from.
+    ///
+    /// A geeklist entry only carries an object id and a name — no image, no players,
+    /// no stats — so every id it yields has to be looked up again through /thing.
+    func fetchGeeklistGames(id: String) async throws -> [BGGItem] {
+        let geeklist = try await fetchGeeklist(id: id)
+
+        var seen = Set<String>()
+        let ids = geeklist.items
+            .filter { $0.subtype == "boardgame" }
+            .map(\.objectId)
+            // The same game can legitimately appear twice in one geeklist.
+            .filter { seen.insert($0).inserted }
+
+        guard !ids.isEmpty else { return [] }
+
+        let games = try await fetchGames(ids: ids)
+
+        // Results come back grouped per batch, so put them back in the list's order.
+        let gamesByID = Dictionary(games.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return ids.compactMap { gamesByID[$0] }
     }
 
-    // MARK: Ambil Thumbnail dalam batch
-    private func fetchThumbnailBatch(ids: [String]) async throws -> [String: String] {
-        guard var components = URLComponents(string: "\(baseURL)/thing") else {
-            throw BGGError.invalidURL
-        }
-        components.queryItems = [
-            URLQueryItem(name: "id", value: ids.joined(separator: ","))
-        ]
-        guard let url = components.url else { throw BGGError.invalidURL }
-        let request = makeRequest(url: url)
+    // MARK: - Things
 
-        for _ in 0..<4 {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse else {
-                throw BGGError.invalidResponse(statusCode: -1, body: nil)
-            }
-
-            switch http.statusCode {
-            case 200:
-                let decoded = try decoder.decode(BGGThingResponse.self, from: data)
-                var mapping: [String: String] = [:]
-                for item in decoded.items {
-                    if let thumbnail = item.thumbnail {
-                        mapping[item.id] = thumbnail
-                    }
-                }
-                return mapping
-            case 202:
-                try await Task.sleep(nanoseconds: 1_500_000_000)
-            default:
-                throw BGGError.invalidResponse(statusCode: http.statusCode, body: String(data: data, encoding: .utf8))
-            }
+    func fetchGame(id: String) async throws -> BGGItem {
+        guard let game = try await fetchGames(ids: [id]).first else {
+            throw BGGError.noResults
         }
-        throw BGGError.invalidResponse(statusCode: 202, body: "Still queued after several retries.")
+        return game
     }
 
-    
-    private static func validate(_ response: URLResponse, data: Data) throws {
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-            throw BGGError.invalidResponse(statusCode: statusCode, body: String(data: data, encoding: .utf8))
+    /// Fetches full detail for many ids, batched to what /thing will accept.
+    ///
+    /// `stats=1` is what carries `averageweight` (complexity) and `average` (rating);
+    /// without it both come back absent and the cards lose two of their four stats.
+    func fetchGames(ids: [String]) async throws -> [BGGItem] {
+        guard !ids.isEmpty else { return [] }
+
+        var games: [BGGItem] = []
+
+        for (index, batch) in ids.chunked(into: Self.batchSize).enumerated() {
+            if index > 0 {
+                try await Task.sleep(for: Self.batchPause)
+            }
+
+            guard var components = URLComponents(string: "\(baseURL)/thing") else {
+                throw BGGError.invalidURL
+            }
+            components.queryItems = [
+                URLQueryItem(name: "id", value: batch.joined(separator: ",")),
+                URLQueryItem(name: "stats", value: "1")
+            ]
+            guard let url = components.url else { throw BGGError.invalidURL }
+
+            games += try await fetch(BGGThingResponse.self, from: url).items
         }
+
+        return games
+    }
+
+    // MARK: - Input parsing
+
+    /// Pulls the list id out of a geeklist URL — `.../geeklist/331207/some-slug` — or
+    /// accepts a bare numeric id that was typed in directly.
+    ///
+    /// `nonisolated` so views can validate input without awaiting the actor.
+    nonisolated static func geeklistID(from input: String) -> String? {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if isNumericID(trimmed) { return trimmed }
+
+        guard let url = URL(string: trimmed) else { return nil }
+        return geeklistID(from: url)
+    }
+
+    nonisolated static func geeklistID(from url: URL) -> String? {
+        let segments = url.pathComponents.filter { $0 != "/" }
+        guard let marker = segments.firstIndex(of: "geeklist"),
+              case let idIndex = segments.index(after: marker),
+              segments.indices.contains(idIndex),
+              isNumericID(segments[idIndex]) else {
+            return nil
+        }
+        return segments[idIndex]
+    }
+
+    private nonisolated static func isNumericID(_ candidate: String) -> Bool {
+        !candidate.isEmpty && candidate.allSatisfy(\.isNumber)
     }
 }

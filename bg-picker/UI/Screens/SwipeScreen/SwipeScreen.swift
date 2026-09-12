@@ -9,7 +9,14 @@ import SwiftUI
 
 struct SwipeScreen: View {
     @Binding var path: NavigationPath
-    @ObservedObject private var viewModel = SwipeViewModel()
+    // Defaulted rather than required: no prop-drilling, but previews and the debug
+    // harness can still inject an isolated store.
+    @ObservedObject var store: SessionGameStore = .shared
+
+    // @StateObject, not @ObservedObject: this view owns the deck. An @ObservedObject
+    // initialised inline is re-created whenever SwiftUI re-inits the view, which
+    // silently throws away swipe progress.
+    @StateObject private var viewModel = SwipeViewModel()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -26,15 +33,10 @@ struct SwipeScreen: View {
 
                 Spacer(minLength: 8)
 
-                SwipeableCardsView(swipeableViewModel: viewModel) { _ in
-                    finishSwiping()
-                }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, maxHeight: 560)
-                .onAppear {
-                    viewModel.reset()
-                }
+                content
+                    .padding(.top, 16)
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity, maxHeight: 560)
 
                 Spacer(minLength: 32)
 
@@ -53,6 +55,56 @@ struct SwipeScreen: View {
                 .padding(.bottom, 40)
             }
         }
+        .onAppear { syncDeck() }
+        .onChange(of: store.cards) { _, _ in syncDeck() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch store.state {
+        case .idle, .loading:
+            statusView {
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(1.4)
+                Text("Loading games from the geeklist…")
+            }
+
+        case .failed(let message):
+            statusView {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.red.opacity(0.9))
+                Text(message)
+            }
+
+        case .loaded where store.cards.isEmpty:
+            statusView {
+                Image(systemName: "tray")
+                    .font(.system(size: 40))
+                Text("That geeklist has no board games in it.")
+            }
+
+        case .loaded:
+            SwipeableCardsView(swipeableViewModel: viewModel) { _ in
+                finishSwiping()
+            }
+        }
+    }
+
+    private func statusView<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(spacing: 16) {
+            content()
+        }
+        .font(.system(size: 16, weight: .medium))
+        .foregroundStyle(.white.opacity(0.85))
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func syncDeck() {
+        viewModel.setCards(store.cards)
     }
 
     private func finishSwiping() {
@@ -61,7 +113,6 @@ struct SwipeScreen: View {
     }
 }
 
-//#Preview {
-//    SwipeScreen(path: .constant(NavigationPath()))
-//}
-//
+#Preview {
+    SwipeScreen(path: .constant(NavigationPath()), store: SessionGameStore())
+}

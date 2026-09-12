@@ -11,12 +11,29 @@ struct bg_pickerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            GameKitPresentationHost(manager: gameKitManager) {
-                LobbyScreen(gameKitManager: gameKitManager)
+            #if DEBUG
+            // Boot straight into the geeklist harness, skipping the Game Center gate:
+            //   xcrun simctl launch <device> <bundle-id> -GeeklistTest
+            // In Xcode: Product > Scheme > Edit Scheme > Run > Arguments.
+            if ProcessInfo.processInfo.arguments.contains("-GeeklistTest") {
+                NavigationStack {
+                    GeeklistTestScreen()
+                }
+            } else {
+                lobby
             }
-            .task {
-                gameKitManager.authenticate()
-            }
+            #else
+            lobby
+            #endif
+        }
+    }
+
+    private var lobby: some View {
+        GameKitPresentationHost(manager: gameKitManager) {
+            LobbyScreen(gameKitManager: gameKitManager)
+        }
+        .task {
+            gameKitManager.authenticate()
         }
     }
 }
