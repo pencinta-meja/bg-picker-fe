@@ -1,0 +1,26 @@
+{
+  "meta" : {
+    "version" : "2024-11-15"
+  },
+  "resources" : {
+    "gameActivities" : [
+      {
+        "archived" : false,
+        "maximumPlayersCount" : 10,
+        "minimumPlayersCount" : 2,
+        "playStyle" : null,
+        "properties" : {
+
+        },
+        "referenceName" : "boardgameroomInternal",
+        "supportsPartyCode" : true,
+        "vendorIdentifier" : "boardgameroom"
+      }
+    ],
+    "gameActivityLocalizations" : {
+      "boardgameroom" : [
+
+      ]
+    }
+  }
+}

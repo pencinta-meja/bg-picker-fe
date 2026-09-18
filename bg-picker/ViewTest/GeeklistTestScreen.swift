@@ -25,6 +25,10 @@ struct GeeklistTestScreen: View {
     @StateObject private var store = SessionGameStore()
     /// `-GeeklistDeck` jumps straight to the real swipe UI once loading finishes.
     @State private var showDeck = false
+    /// `-CategoryPreference` opens the group picker, which is otherwise only
+    /// reachable once Game Center has handed back a party code.
+    @State private var showPreferences = ProcessInfo.processInfo.arguments.contains("-CategoryPreference")
+    @State private var selectedGroups: Set<BoardGameCategoryGroup> = []
 
     var body: some View {
         AppBackground {
@@ -58,6 +62,9 @@ struct GeeklistTestScreen: View {
                         Button("Open swipe deck") { showDeck = true }
                             .buttonStyle(.borderedProminent)
                     }
+
+                    Button("Open category groups") { showPreferences = true }
+                        .buttonStyle(.bordered)
                 }
                 .padding(24)
                 .padding(.top, 40)
@@ -67,6 +74,13 @@ struct GeeklistTestScreen: View {
         .foregroundStyle(.white)
         .navigationDestination(isPresented: $showDeck) {
             SwipeScreen(path: $path, store: store)
+        }
+        .navigationDestination(isPresented: $showPreferences) {
+            PreferenceScreen(
+                gameKitManager: .shared,
+                selectedGroups: $selectedGroups,
+                path: $path
+            )
         }
         .onChange(of: store.cards) { _, cards in
             if !cards.isEmpty, ProcessInfo.processInfo.arguments.contains("-GeeklistDeck") {

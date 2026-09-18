@@ -47,6 +47,7 @@ QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Im
 ## Implementation Rules
 
 - Keep session data transient and in memory.
+- BGG exposes two different link axes: `boardgamecategory` (what a game is about) and `boardgamemechanic` (how it is played). This app models categories only, as `BoardGameCategory`, folded into 13 pickable `BoardGameCategoryGroup`s. Do not reintroduce a type named `Mechanic` holding category values.
 - Fetched session data belongs in a store under `bg-picker/Stores`, reached through its `.shared` instance. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
 - Give stores an internal `init()` alongside `.shared` so previews and tests can use an isolated instance.
 - Keep networking and platform APIs behind focused service types.

@@ -8,7 +8,7 @@
 enum Route: Hashable {
     case createRoom
     case joinRoom
-    case mechanicPreference
+    case categoryPreference
     case swiping
     case podium
 }

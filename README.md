@@ -12,7 +12,7 @@ Board Game Picker is a SwiftUI iOS app for helping a group agree on a board game
 - Guests join with one native, paste-friendly party-code field. The QR affordance
   on the Join screen is intentionally noninteractive; scanning is not implemented.
 - The Preference screen displays the live party code, locally generated QR image,
-  connected-player count, and optional in-memory mechanic choices.
+  connected-player count, and optional in-memory category-group choices.
 - Preference, swipe-card, detail, and podium UI remain available as reusable presentation code.
 - Swipe cards are built from the host's geeklist, and swipe state is transient.
 - There is no backend client, local database, bundled CSV, persistent cache, or fallback game catalog.

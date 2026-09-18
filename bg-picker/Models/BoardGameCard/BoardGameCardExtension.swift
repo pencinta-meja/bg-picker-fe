@@ -29,7 +29,7 @@ extension BoardGameCard {
     // MARK: - Formatting
 
     private static func categoriesText(for item: BGGItem) -> String {
-        let categories = item.categories.prefix(3)
+        let categories = item.categoryNames.prefix(3)
         return categories.isEmpty ? missingValue : categories.joined(separator: ", ")
     }
 

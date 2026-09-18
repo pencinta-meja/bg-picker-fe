@@ -5,7 +5,7 @@ struct LobbyScreen: View {
 
     @State private var path = NavigationPath()
     @State private var geeklistLink = ""
-    @State private var selectedMechanics: Set<Mechanic> = []
+    @State private var selectedGroups: Set<BoardGameCategoryGroup> = []
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -73,10 +73,10 @@ struct LobbyScreen: View {
                     )
                 case .joinRoom:
                     JoinRoomScreen(gameKitManager: gameKitManager)
-                case .mechanicPreference:
+                case .categoryPreference:
                     PreferenceScreen(
                         gameKitManager: gameKitManager,
-                        selectedMechanics: $selectedMechanics,
+                        selectedGroups: $selectedGroups,
                         path: $path
                     )
                 case .swiping:
@@ -148,7 +148,7 @@ struct LobbyScreen: View {
         guard gameKitManager.partyCode != nil else { return }
 
         var destination = NavigationPath()
-        destination.append(Route.mechanicPreference)
+        destination.append(Route.categoryPreference)
         path = destination
     }
 
@@ -158,7 +158,7 @@ struct LobbyScreen: View {
         }
         geeklistLink = ""
         SessionGameStore.shared.clear()
-        selectedMechanics.removeAll()
+        selectedGroups.removeAll()
     }
 }
 

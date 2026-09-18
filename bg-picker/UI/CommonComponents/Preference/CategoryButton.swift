@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MechanicButton: View {
+struct CategoryButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void

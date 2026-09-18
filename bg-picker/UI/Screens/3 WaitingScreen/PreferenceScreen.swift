@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PreferenceScreen: View {
     @ObservedObject var gameKitManager: GameKitManager
-    @Binding var selectedMechanics: Set<Mechanic>
+    @Binding var selectedGroups: Set<BoardGameCategoryGroup>
     @Binding var path: NavigationPath
 
     private let columns = [
@@ -14,15 +14,16 @@ struct PreferenceScreen: View {
         AppBackground {
             ScrollView {
                 VStack(spacing: 24) {
+                    
                     roomSummary
 
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(Mechanic.allCases) { mechanic in
-                            MechanicButton(
-                                title: mechanic.rawValue,
-                                isSelected: selectedMechanics.contains(mechanic)
+                        ForEach(BoardGameCategoryGroup.allCases) { group in
+                            CategoryButton(
+                                title: group.rawValue,
+                                isSelected: selectedGroups.contains(group)
                             ) {
-                                toggle(mechanic)
+                                toggle(group)
                             }
                         }
                     }
@@ -114,11 +115,11 @@ struct PreferenceScreen: View {
         return "\(count) \(count == 1 ? "Person" : "People") Joined"
     }
 
-    private func toggle(_ mechanic: Mechanic) {
-        if selectedMechanics.contains(mechanic) {
-            selectedMechanics.remove(mechanic)
+    private func toggle(_ group: BoardGameCategoryGroup) {
+        if selectedGroups.contains(group) {
+            selectedGroups.remove(group)
         } else {
-            selectedMechanics.insert(mechanic)
+            selectedGroups.insert(group)
         }
     }
 }
@@ -127,7 +128,7 @@ struct PreferenceScreen: View {
     NavigationStack {
         PreferenceScreen(
             gameKitManager: .shared,
-            selectedMechanics: .constant(Set<Mechanic>()),
+            selectedGroups: .constant(Set<BoardGameCategoryGroup>()),
             path: .constant(NavigationPath())
         )
     }

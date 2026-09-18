@@ -12,8 +12,9 @@ nonisolated struct BGGItem: Codable, Identifiable {
     let maxPlayTime: BGGValueAttr?
     let image: String?
     let thumbnail: String?
-    /// Categories, mechanics, designers and more all arrive as `<link>` siblings;
-    /// they are only told apart by their `type`.
+    /// Categories, mechanics, designers and more all arrive as `<link>` siblings,
+    /// told apart only by their `type`. This app reads categories; BGG's separate
+    /// `boardgamemechanic` links are deliberately not surfaced.
     let links: [BGGLinkAttr]?
     /// Present only when the request was made with `stats=1`.
     let statistics: BGGStatistics?
@@ -59,8 +60,25 @@ nonisolated struct BGGItem: Codable, Identifiable {
             .map(\.value)
     }
 
-    var categories: [String] { linkValues(ofType: "boardgamecategory") }
-    var mechanics: [String] { linkValues(ofType: "boardgamemechanic") }
+    /// Raw strings exactly as BGG sent them — used where the specific name reads
+    /// better than a group label, such as the card's subtitle.
+    var categoryNames: [String] { linkValues(ofType: "boardgamecategory") }
+
+    /// The subset of `categoryNames` this app knows about.
+    ///
+    /// `compactMap` rather than a failable map: BGG can return a category the enum has
+    /// not caught up with, and one unknown string should drop rather than take the
+    /// whole game down with it.
+    var categories: [BoardGameCategory] {
+        categoryNames.compactMap(BoardGameCategory.init(rawValue:))
+    }
+
+    /// The distinct groups this game falls under, in first-seen order. This is what a
+    /// group-based filter matches against.
+    var categoryGroups: [BoardGameCategoryGroup] {
+        var seen = Set<BoardGameCategoryGroup>()
+        return categories.compactMap(\.group).filter { seen.insert($0).inserted }
+    }
 
     // MARK: - Statistics
 
