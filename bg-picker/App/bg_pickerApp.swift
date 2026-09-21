@@ -17,8 +17,10 @@ struct bg_pickerApp: App {
             }
             .task {
                 // The one place that knows about both the session and the stores, so the
-                // flow teardown is wired here rather than inside a screen.
-                router.onReturnToLobby = {
+                // flow teardown is wired here rather than inside a screen. Keyed to the room
+                // screen leaving the stack, so backing out to the setup form drops the room
+                // and its deck — not only backing all the way to the lobby.
+                router.onFlowEnded = {
                     if gameKitManager.hasActiveRoom {
                         gameKitManager.disconnect()
                     }

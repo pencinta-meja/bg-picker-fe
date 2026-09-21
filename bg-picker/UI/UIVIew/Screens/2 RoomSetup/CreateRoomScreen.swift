@@ -51,11 +51,10 @@ struct CreateRoomScreen: View {
         .onChange(of: geeklistLink) { _, _ in
             hasAttemptedSubmission = false
         }
-        // This screen asked for the room, so this screen routes to it. Replacing rather than
-        // pushing: the form is spent once a code exists.
+        // This screen asked for the room, so this screen routes to it.
         .onChange(of: room.partyCode) { _, code in
             if code != nil {
-                router.replace(with: .categoryPreference)
+                router.push(.categoryPreference)
             }
         }
     }

@@ -15,17 +15,21 @@ import SwiftUI
 @Observable
 @MainActor
 final class AppRouter {
-    private(set) var path = NavigationPath()
+    /// A typed array rather than `NavigationPath` so the router can see what is on the
+    /// stack — `NavigationPath` erases its elements, and the teardown below has to know
+    /// whether the room screen is still there.
+    private(set) var path: [Route] = []
 
-    /// Fires when the stack returns to the lobby. The interactive back gesture never calls
-    /// `pop()`, so this has to be driven by the path itself. Wired at the composition root.
+    /// Fires when the room flow ends: the preference screen left the stack, or the stack
+    /// emptied. The interactive back gesture never calls `pop()`, so this has to be driven
+    /// by the path itself. Wired at the composition root, and safe to run twice.
     @ObservationIgnored
-    var onReturnToLobby: (() -> Void)?
+    var onFlowEnded: (() -> Void)?
 
     var isAtLobby: Bool { path.isEmpty }
 
     /// Hand this to `NavigationStack`; SwiftUI's writes then land in `update(to:)` too.
-    var pathBinding: Binding<NavigationPath> {
+    var pathBinding: Binding<[Route]> {
         Binding(
             get: { self.path },
             set: { self.update(to: $0) }
@@ -33,48 +37,35 @@ final class AppRouter {
     }
 
     func push(_ route: Route) {
-        var updated = path
-        updated.append(route)
-        update(to: updated)
+        update(to: path + [route])
     }
 
     func pop() {
         guard !path.isEmpty else { return }
-        var updated = path
-        updated.removeLast()
-        update(to: updated)
+        update(to: path.dropLast())
     }
 
     func popToLobby() {
-        update(to: NavigationPath())
-    }
-
-    /// Swap the top of the stack. A setup screen calls this once its room exists: it has done
-    /// its job, and leaving it underneath would put a dead form with a permanently disabled
-    /// button between the room and the lobby.
-    func replace(with route: Route) {
-        var updated = path
-        if !updated.isEmpty {
-            updated.removeLast()
-        }
-        updated.append(route)
-        update(to: updated)
+        update(to: [])
     }
 
     /// A room arrived with no setup screen on screen — Game Center accepting a scanned party
     /// link through `player(_:wantsToPlay:)`. Resets the stack to that one route.
     func enterRoom() {
-        var destination = NavigationPath()
-        destination.append(Route.categoryPreference)
-        update(to: destination)
+        update(to: [.categoryPreference])
     }
 
-    private func update(to newPath: NavigationPath) {
+    private func update(to newPath: some Sequence<Route>) {
+        let wasInRoom = path.contains(.categoryPreference)
         let wasInFlow = !path.isEmpty
-        path = newPath
 
-        if wasInFlow, path.isEmpty {
-            onReturnToLobby?()
+        path = Array(newPath)
+
+        let leftRoom = wasInRoom && !path.contains(.categoryPreference)
+        let returnedToLobby = wasInFlow && path.isEmpty
+
+        if leftRoom || returnedToLobby {
+            onFlowEnded?()
         }
     }
 }

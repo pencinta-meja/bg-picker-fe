@@ -74,7 +74,7 @@ struct JoinRoomScreen: View {
         // Same contract as CreateRoomScreen: whoever opened the room routes to it.
         .onChange(of: room.partyCode) { _, code in
             if code != nil {
-                router.replace(with: .categoryPreference)
+                router.push(.categoryPreference)
             }
         }
     }
