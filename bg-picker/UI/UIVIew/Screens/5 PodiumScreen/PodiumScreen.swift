@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct PodiumScreen: View {
-    @Binding var path: NavigationPath
 
     var body: some View {
         ZStack {
@@ -30,5 +29,5 @@ struct PodiumScreen: View {
 }
 
 #Preview {
-    PodiumScreen(path: .constant(NavigationPath()))
+    PodiumScreen()
 }

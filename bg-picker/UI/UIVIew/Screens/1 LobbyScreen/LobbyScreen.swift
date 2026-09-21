@@ -2,13 +2,10 @@ import SwiftUI
 
 struct LobbyScreen: View {
     let room: any RoomSession
-
-    @State private var path = NavigationPath()
-    @State private var geeklistLink = ""
-    @State private var selectedGroups: Set<BoardGameCategoryGroup> = []
+    let router: AppRouter
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: router.pathBinding) {
             AppBackground {
                 GeometryReader { proxy in
                     ScrollView {
@@ -31,23 +28,14 @@ struct LobbyScreen: View {
 
                             VStack(spacing: 14) {
                                 PrimaryButton(title: "Create Room") {
-                                    path.append(Route.createRoom)
+                                    router.push(.createRoom)
                                 }
 
                                 PrimaryButton(title: "Join Room", style: .outlined) {
-                                    path.append(Route.joinRoom)
+                                    router.push(.joinRoom)
                                 }
                             }
                             .disabled(!canEnterRoomSetup)
-
-                            #if DEBUG
-                            NavigationLink("Geeklist test (debug)") {
-                                GeeklistTestScreen()
-                            }
-                            .font(.footnote.bold())
-                            .foregroundStyle(.white.opacity(0.75))
-                            .padding(.top, 20)
-                            #endif
 
                             if shouldShowGameCenterStatus {
                                 gameCenterStatus
@@ -65,37 +53,14 @@ struct LobbyScreen: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Route.self) { route in
-                switch route {
-                case .createRoom:
-                    CreateRoomScreen(
-                        room: room,
-                        geeklistLink: $geeklistLink
-                    )
-                case .joinRoom:
-                    JoinRoomScreen(room: room)
-                case .categoryPreference:
-                    PreferenceScreen(
-                        room: room,
-                        selectedGroups: $selectedGroups,
-                        path: $path
-                    )
-                case .swiping:
-                    SwipeScreen(path: $path)
-                case .podium:
-                    PodiumScreen(path: $path)
-                }
+                RouteDestinationView(route: route, room: room, router: router)
             }
-            .onAppear {
-                routeToPreferenceIfRoomIsActive()
-            }
-            .onChange(of: room.partyCode) { _, code in
-                if code != nil {
-                    routeToPreferenceIfRoomIsActive()
-                }
-            }
-            .onChange(of: path.count) { previousCount, newCount in
-                if previousCount > 0, newCount == 0 {
-                    endRoomSetup()
+            // The only forward move the lobby still owns: a room nobody on screen asked for,
+            // handed over by Game Center when another player accepts a party link. Create and
+            // Join route their own rooms, and by then the lobby is not on top.
+            .onChange(of: room.partyCode, initial: true) { _, code in
+                if code != nil, router.isAtLobby {
+                    router.enterRoom()
                 }
             }
         }
@@ -143,35 +108,18 @@ struct LobbyScreen: View {
         )
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
-    private func routeToPreferenceIfRoomIsActive() {
-        guard room.partyCode != nil else { return }
-
-        var destination = NavigationPath()
-        destination.append(Route.categoryPreference)
-        path = destination
-    }
-
-    private func endRoomSetup() {
-        if room.hasActiveRoom {
-            room.disconnect()
-        }
-        geeklistLink = ""
-        SessionGameStore.shared.clear()
-        selectedGroups.removeAll()
-    }
 }
 
 #if DEBUG
 #Preview("Ready") {
-    LobbyScreen(room: PreviewRoomSession.ready)
+    LobbyScreen(room: PreviewRoomSession.ready, router: AppRouter())
 }
 
 #Preview("Signed out") {
-    LobbyScreen(room: PreviewRoomSession.signedOut)
+    LobbyScreen(room: PreviewRoomSession.signedOut, router: AppRouter())
 }
 
 #Preview("Activity failed") {
-    LobbyScreen(room: PreviewRoomSession.failed())
+    LobbyScreen(room: PreviewRoomSession.failed(), router: AppRouter())
 }
 #endif

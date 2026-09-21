@@ -2,8 +2,9 @@ import SwiftUI
 
 struct PreferenceScreen: View {
     let room: any RoomSession
-    @Binding var selectedGroups: Set<BoardGameCategoryGroup>
-    @Binding var path: NavigationPath
+    let router: AppRouter
+
+    @State private var selectedGroups: Set<BoardGameCategoryGroup> = []
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -51,7 +52,7 @@ struct PreferenceScreen: View {
             .scrollIndicators(.hidden)
             .safeAreaInset(edge: .bottom) {
                 PrimaryButton(title: "Next") {
-                    path.append(Route.swiping)
+                    router.push(.swiping)
                 }
                 .padding(.horizontal, 36)
                 .padding(.vertical, 16)
@@ -129,8 +130,7 @@ struct PreferenceScreen: View {
     NavigationStack {
         PreferenceScreen(
             room: PreviewRoomSession.waitingForPlayers,
-            selectedGroups: .constant([.fantasyAndSciFi, .partyAndPopCulture]),
-            path: .constant(NavigationPath())
+            router: AppRouter()
         )
     }
 }
@@ -139,8 +139,7 @@ struct PreferenceScreen: View {
     NavigationStack {
         PreferenceScreen(
             room: PreviewRoomSession.ready,
-            selectedGroups: .constant([]),
-            path: .constant(NavigationPath())
+            router: AppRouter()
         )
     }
 }

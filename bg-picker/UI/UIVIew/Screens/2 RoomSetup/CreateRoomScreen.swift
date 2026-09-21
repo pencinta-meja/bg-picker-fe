@@ -2,9 +2,10 @@ import SwiftUI
 
 struct CreateRoomScreen: View {
     let room: any RoomSession
+    let router: AppRouter
     @ObservedObject var store: SessionGameStore = .shared
-    @Binding var geeklistLink: String
 
+    @State private var geeklistLink = ""
     @State private var hasAttemptedSubmission = false
     @FocusState private var linkFieldFocused: Bool
 
@@ -49,6 +50,13 @@ struct CreateRoomScreen: View {
         }
         .onChange(of: geeklistLink) { _, _ in
             hasAttemptedSubmission = false
+        }
+        // This screen asked for the room, so this screen routes to it. Replacing rather than
+        // pushing: the form is spent once a code exists.
+        .onChange(of: room.partyCode) { _, code in
+            if code != nil {
+                router.replace(with: .categoryPreference)
+            }
         }
     }
 
@@ -155,8 +163,8 @@ struct CreateRoomScreen: View {
     NavigationStack {
         CreateRoomScreen(
             room: PreviewRoomSession.ready,
-            store: SessionGameStore(),
-            geeklistLink: .constant("")
+            router: AppRouter(),
+            store: SessionGameStore()
         )
     }
 }
@@ -165,8 +173,8 @@ struct CreateRoomScreen: View {
     NavigationStack {
         CreateRoomScreen(
             room: PreviewRoomSession.loadingActivity,
-            store: SessionGameStore(),
-            geeklistLink: .constant("https://boardgamegeek.com/geeklist/331207")
+            router: AppRouter(),
+            store: SessionGameStore()
         )
     }
 }

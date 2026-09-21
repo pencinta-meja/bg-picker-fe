@@ -2,6 +2,7 @@ import SwiftUI
 
 struct JoinRoomScreen: View {
     let room: any RoomSession
+    let router: AppRouter
 
     @State private var roomCode = ""
     @State private var hasAttemptedSubmission = false
@@ -69,6 +70,12 @@ struct JoinRoomScreen: View {
                 roomCode = normalized
             }
             hasAttemptedSubmission = false
+        }
+        // Same contract as CreateRoomScreen: whoever opened the room routes to it.
+        .onChange(of: room.partyCode) { _, code in
+            if code != nil {
+                router.replace(with: .categoryPreference)
+            }
         }
     }
 
@@ -168,13 +175,13 @@ private struct PartyCodeField: View {
 #if DEBUG
 #Preview("Ready") {
     NavigationStack {
-        JoinRoomScreen(room: PreviewRoomSession.ready)
+        JoinRoomScreen(room: PreviewRoomSession.ready, router: AppRouter())
     }
 }
 
 #Preview("Activity failed") {
     NavigationStack {
-        JoinRoomScreen(room: PreviewRoomSession.failed())
+        JoinRoomScreen(room: PreviewRoomSession.failed(), router: AppRouter())
     }
 }
 #endif

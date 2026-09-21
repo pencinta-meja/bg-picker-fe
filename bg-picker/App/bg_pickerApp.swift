@@ -8,32 +8,24 @@ import SwiftUI
 @main
 struct bg_pickerApp: App {
     @State private var gameKitManager = GameKitManager.shared
+    @State private var router = AppRouter()
 
     var body: some Scene {
         WindowGroup {
-            #if DEBUG
-            // Boot straight into the geeklist harness, skipping the Game Center gate:
-            //   xcrun simctl launch <device> <bundle-id> -GeeklistTest
-            // In Xcode: Product > Scheme > Edit Scheme > Run > Arguments.
-            if ProcessInfo.processInfo.arguments.contains("-GeeklistTest") {
-                NavigationStack {
-                    GeeklistTestScreen()
-                }
-            } else {
-                lobby
+            GameKitPresentationHost(session: gameKitManager) {
+                LobbyScreen(room: gameKitManager, router: router)
             }
-            #else
-            lobby
-            #endif
-        }
-    }
-
-    private var lobby: some View {
-        GameKitPresentationHost(session: gameKitManager) {
-            LobbyScreen(room: gameKitManager)
-        }
-        .task {
-            gameKitManager.authenticate()
+            .task {
+                // The one place that knows about both the session and the stores, so the
+                // flow teardown is wired here rather than inside a screen.
+                router.onReturnToLobby = {
+                    if gameKitManager.hasActiveRoom {
+                        gameKitManager.disconnect()
+                    }
+                    SessionGameStore.shared.clear()
+                }
+                gameKitManager.authenticate()
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SwipeScreen: View {
-    @Binding var path: NavigationPath
+    let router: AppRouter
     // Defaulted rather than required: no prop-drilling, but previews and the debug
     // harness can still inject an isolated store.
     @ObservedObject var store: SessionGameStore = .shared
@@ -109,10 +109,10 @@ struct SwipeScreen: View {
 
     private func finishSwiping() {
         guard viewModel.canFinish else { return }
-        path.append(Route.podium)
+        router.push(.podium)
     }
 }
 
 #Preview {
-    SwipeScreen(path: .constant(NavigationPath()), store: SessionGameStore())
+    SwipeScreen(router: AppRouter(), store: SessionGameStore())
 }
