@@ -21,14 +21,15 @@ Board Game Picker is a SwiftUI iOS app for helping a group agree on a board game
 
 Game Center provides player identity, party-code matchmaking, match lifecycle, and peer-to-peer session messages through the iOS 26 `GKGameActivity` API.
 
-`GameKitManager.shared` is the frontend boundary:
+The `RoomSession` protocol is the frontend boundary; screens depend on `any RoomSession`, never on GameKit. `GameKitManager.shared` conforms to it at runtime, and the DEBUG-only `PreviewRoomSession` conforms to it in Xcode previews so screens can be built without a Game Center sign-in.
 
 - Call `authenticate()` once when the app starts.
 - Call `createRoom()` to generate and start a new `XXX-XXX` party-code room.
 - Call `joinRoom(code:)` to join an existing party-code room.
-- Call `send(_:type:reliably:)` with any `Encodable` value to send a typed packet to every connected player.
-- Observe `partyCode`, `partyURL`, `players`, `matchState`, `statusMessage`, and `receivedPackets`, or set `onPacketReceived` for event-driven handling.
+- Observe `partyCode`, `partyURL`, `roomMemberCount`, `matchState`, `statusMessage`, and `errorMessage`.
 - Call `disconnect()` when the room ends.
+
+Packet traffic stays on `GameKitManager` itself until a screen needs it: `send(_:type:reliably:)` with any `Encodable` value, plus `receivedPackets` or `onPacketReceived` for event-driven handling.
 
 Room QR images are generated locally with Core Image; no QR package is required.
 

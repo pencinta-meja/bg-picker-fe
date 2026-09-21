@@ -7,7 +7,7 @@ import SwiftUI
 
 @main
 struct bg_pickerApp: App {
-    @StateObject private var gameKitManager = GameKitManager.shared
+    @State private var gameKitManager = GameKitManager.shared
 
     var body: some Scene {
         WindowGroup {
@@ -29,8 +29,8 @@ struct bg_pickerApp: App {
     }
 
     private var lobby: some View {
-        GameKitPresentationHost(manager: gameKitManager) {
-            LobbyScreen(gameKitManager: gameKitManager)
+        GameKitPresentationHost(session: gameKitManager) {
+            LobbyScreen(room: gameKitManager)
         }
         .task {
             gameKitManager.authenticate()

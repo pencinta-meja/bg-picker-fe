@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CreateRoomScreen: View {
-    @ObservedObject var gameKitManager: GameKitManager
+    let room: any RoomSession
     @ObservedObject var store: SessionGameStore = .shared
     @Binding var geeklistLink: String
 
@@ -88,18 +88,18 @@ struct CreateRoomScreen: View {
             .font(.footnote)
             .foregroundStyle(.red.opacity(0.92))
             .frame(maxWidth: .infinity, alignment: .leading)
-        } else if let error = gameKitManager.errorMessage {
+        } else if let error = room.errorMessage {
             Label(error, systemImage: "exclamationmark.triangle.fill")
                 .font(.footnote)
                 .foregroundStyle(.red.opacity(0.92))
                 .frame(maxWidth: .infinity, alignment: .leading)
-        } else if !gameKitManager.isAuthenticated || !gameKitManager.isActivityReady {
+        } else if !room.isAuthenticated || !room.isActivityReady {
             HStack(spacing: 8) {
-                if gameKitManager.matchState == .loadingActivity {
+                if room.matchState == .loadingActivity {
                     ProgressView()
                         .tint(.white)
                 }
-                Text(gameKitManager.statusMessage)
+                Text(room.statusMessage)
             }
             .font(.footnote)
             .foregroundStyle(.white.opacity(0.7))
@@ -132,9 +132,9 @@ struct CreateRoomScreen: View {
 
     private var canCreateRoom: Bool {
         validGeeklistURL != nil
-            && gameKitManager.isAuthenticated
-            && gameKitManager.isActivityReady
-            && !gameKitManager.hasActiveRoom
+            && room.isAuthenticated
+            && room.isActivityReady
+            && !room.hasActiveRoom
     }
 
     private func createRoom() {
@@ -146,16 +146,28 @@ struct CreateRoomScreen: View {
         linkFieldFocused = false
         geeklistLink = url.absoluteString
         store.load(geeklistID: listID)
-        gameKitManager.createRoom()
+        room.createRoom()
     }
 }
 
-#Preview {
+#if DEBUG
+#Preview("Ready") {
     NavigationStack {
         CreateRoomScreen(
-            gameKitManager: .shared,
+            room: PreviewRoomSession.ready,
             store: SessionGameStore(),
             geeklistLink: .constant("")
         )
     }
 }
+
+#Preview("Loading activity") {
+    NavigationStack {
+        CreateRoomScreen(
+            room: PreviewRoomSession.loadingActivity,
+            store: SessionGameStore(),
+            geeklistLink: .constant("https://boardgamegeek.com/geeklist/331207")
+        )
+    }
+}
+#endif

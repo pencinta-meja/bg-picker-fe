@@ -2,22 +2,22 @@ import SwiftUI
 import UIKit
 
 struct GameKitPresentationHost<Content: View>: View {
-    @ObservedObject var manager: GameKitManager
+    let session: any RoomSession
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         content()
             .fullScreenCover(
                 isPresented: Binding(
-                    get: { manager.presentedViewController != nil },
+                    get: { session.presentedViewController != nil },
                     set: { isPresented in
                         if !isPresented {
-                            manager.dismissPresentedController()
+                            session.dismissPresentedController()
                         }
                     }
                 )
             ) {
-                if let controller = manager.presentedViewController {
+                if let controller = session.presentedViewController {
                     UIKitControllerHost(controller: controller)
                         .ignoresSafeArea()
                 }

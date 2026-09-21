@@ -28,15 +28,16 @@ The Xcode project uses a file-system-synchronized root group. New Swift files pl
 
 ## GameKit Architecture
 
-`GameKitManager.shared` is the frontend-facing multiplayer boundary. Views should call the manager instead of importing matchmaking behavior into UI code.
+`RoomSession` (`bg-picker/Services/RoomSession.swift`) is the frontend-facing multiplayer boundary. Screens hold `any RoomSession` and never name a concrete type, so matchmaking behavior stays out of UI code.
 
-The manager currently provides:
+- `GameKitManager.shared` is the production conformer and the only type that imports GameKit.
+- `PreviewRoomSession` (`bg-picker/ViewTest`, `#if DEBUG`) is the preview conformer. It poses the screens in any state without authenticating — which matters because contributors hold separate Individual memberships, so only the App ID's owner can sign in at all.
 
-- `authenticate()` for Game Center authentication.
-- `createRoom()` for a new GameKit party-code activity.
-- `joinRoom(code:)` for joining by party code.
-- `send(_:type:reliably:)` for typed match packets.
-- `disconnect()` for ending the transient room session.
+The protocol carries what the UI reads — `isAuthenticated`, `isActivityReady`, `hasActiveRoom`, `matchState`, `statusMessage`, `errorMessage`, `partyCode`, `partyURL`, `roomMemberCount`, `presentedViewController` — plus `authenticate()`, `createRoom()`, `joinRoom(code:)`, `disconnect()` and `dismissPresentedController()`. `players` stays off it: `GKPlayer` has no public initializer, so no fake can produce one and the UI gets `roomMemberCount` (local player included) instead.
+
+Packet traffic — `send(_:type:reliably:)`, `receivedPackets`, `onPacketReceived` — is still `GameKitManager`-only. Add it to `RoomSession` when a screen needs it, not before.
+
+`GameKitManager` is `@Observable` rather than `ObservableObject`, because `@ObservedObject` cannot hold a protocol while Observation tracks reads made through `any RoomSession` correctly. `PartyCode.normalize(_:)` sits in the same file for party-code text formatting that involves no GameKit.
 
 The required Game Activity identifier is `boardgameroom`. It must be configured in App Store Connect with party-code support, synchronous play, and a 2–6 player range.
 

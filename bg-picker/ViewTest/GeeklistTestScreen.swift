@@ -29,6 +29,8 @@ struct GeeklistTestScreen: View {
     /// reachable once Game Center has handed back a party code.
     @State private var showPreferences = ProcessInfo.processInfo.arguments.contains("-CategoryPreference")
     @State private var selectedGroups: Set<BoardGameCategoryGroup> = []
+    /// Posed rather than real: this harness exists precisely to avoid Game Center.
+    @State private var room = PreviewRoomSession.waitingForPlayers
 
     var body: some View {
         AppBackground {
@@ -77,7 +79,7 @@ struct GeeklistTestScreen: View {
         }
         .navigationDestination(isPresented: $showPreferences) {
             PreferenceScreen(
-                gameKitManager: .shared,
+                room: room,
                 selectedGroups: $selectedGroups,
                 path: $path
             )

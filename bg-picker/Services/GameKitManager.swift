@@ -1,9 +1,9 @@
-import Combine
 import Foundation
 @preconcurrency import GameKit
+import Observation
 import UIKit
 
-private final class WeakSendableBox<Value: AnyObject>: @unchecked Sendable {
+private nonisolated final class WeakSendableBox<Value: AnyObject>: @unchecked Sendable {
     weak var value: Value?
 
     init(_ value: Value) {
@@ -11,7 +11,7 @@ private final class WeakSendableBox<Value: AnyObject>: @unchecked Sendable {
     }
 }
 
-private struct UncheckedSendableBox<Value>: @unchecked Sendable {
+private nonisolated struct UncheckedSendableBox<Value>: @unchecked Sendable {
     let value: Value
 }
 
@@ -40,17 +40,9 @@ struct GameKitReceivedPacket: Identifiable {
     var id: UUID { packet.id }
 }
 
+@Observable
 @MainActor
-final class GameKitManager: NSObject, ObservableObject {
-    enum MatchState: String {
-        case idle = "Not ready"
-        case loadingActivity = "Loading room service"
-        case ready = "Ready"
-        case matchmaking = "Finding room members"
-        case connected = "Connected"
-        case failed = "Needs attention"
-    }
-
+final class GameKitManager: NSObject, RoomSession {
     enum RoomRole: Equatable {
         case host
         case guest
@@ -59,30 +51,33 @@ final class GameKitManager: NSObject, ObservableObject {
     static let shared = GameKitManager()
     static let activityDefinitionID = "boardgameroom"
 
-    @Published private(set) var isAuthenticated = false
-    @Published private(set) var playerName = "Not signed in"
-    @Published private(set) var matchState: MatchState = .idle
-    @Published private(set) var players: [GKPlayer] = []
-    @Published private(set) var receivedPackets: [GameKitReceivedPacket] = []
-    @Published private(set) var statusMessage = "Game Center is not initialized."
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var partyCode: String?
-    @Published private(set) var partyURL: URL?
-    @Published private(set) var roomRole: RoomRole?
-    @Published var presentedViewController: UIViewController?
+    private(set) var isAuthenticated = false
+    private(set) var playerName = "Not signed in"
+    private(set) var matchState: RoomMatchState = .idle
+    private(set) var players: [GKPlayer] = []
+    private(set) var receivedPackets: [GameKitReceivedPacket] = []
+    private(set) var statusMessage = "Game Center is not initialized."
+    private(set) var errorMessage: String?
+    private(set) var partyCode: String?
+    private(set) var partyURL: URL?
+    private(set) var roomRole: RoomRole?
+    var presentedViewController: UIViewController?
 
+    @ObservationIgnored
     var onPacketReceived: ((GameKitReceivedPacket) -> Void)?
 
     var isActivityReady: Bool { activityDefinition != nil }
     var hasActiveRoom: Bool { currentActivity != nil || match != nil }
+    /// The local player is not in `match.players`, hence the + 1.
+    var roomMemberCount: Int { hasActiveRoom ? players.count + 1 : 0 }
 
     private var activityDefinition: GKGameActivityDefinition?
     private var currentActivity: GKGameActivity?
     private var match: GKMatch?
-    private var didConfigureAuthentication = false
-    private var isLoadingDefinition = false
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
+    @ObservationIgnored private var didConfigureAuthentication = false
+    @ObservationIgnored private var isLoadingDefinition = false
+    @ObservationIgnored private let encoder = JSONEncoder()
+    @ObservationIgnored private let decoder = JSONDecoder()
 
     private override init() {
         super.init()
@@ -125,7 +120,7 @@ final class GameKitManager: NSObject, ObservableObject {
     func joinRoom(code: String) {
         guard canStartRoom(), let activityDefinition else { return }
 
-        let normalizedCode = Self.normalizePartyCodeInput(code)
+        let normalizedCode = PartyCode.normalize(code)
         guard GKGameActivity.isValidPartyCode(normalizedCode) else {
             setError("Enter a valid room code in the format ABC-DEF.")
             return
@@ -193,20 +188,6 @@ final class GameKitManager: NSObject, ObservableObject {
 
     func dismissPresentedController() {
         presentedViewController = nil
-    }
-
-    static func normalizePartyCodeInput(_ input: String) -> String {
-        let characters = input
-            .uppercased()
-            .filter { $0.isLetter || $0.isNumber }
-            .prefix(6)
-
-        guard characters.count > 3 else {
-            return String(characters)
-        }
-
-        let splitIndex = characters.index(characters.startIndex, offsetBy: 3)
-        return "\(characters[..<splitIndex])-\(characters[splitIndex...])"
     }
 
     private static func generatePartyCode() -> String {

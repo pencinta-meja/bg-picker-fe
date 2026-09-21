@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PreferenceScreen: View {
-    @ObservedObject var gameKitManager: GameKitManager
+    let room: any RoomSession
     @Binding var selectedGroups: Set<BoardGameCategoryGroup>
     @Binding var path: NavigationPath
 
@@ -28,16 +28,16 @@ struct PreferenceScreen: View {
                         }
                     }
 
-                    if let error = gameKitManager.errorMessage {
+                    if let error = room.errorMessage {
                         Label(error, systemImage: "exclamationmark.triangle.fill")
                             .font(.footnote)
                             .foregroundStyle(.red.opacity(0.92))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                    } else if gameKitManager.matchState == .matchmaking {
+                    } else if room.matchState == .matchmaking {
                         HStack(spacing: 10) {
                             ProgressView()
                                 .tint(.white)
-                            Text(gameKitManager.statusMessage)
+                            Text(room.statusMessage)
                                 .font(.footnote)
                                 .foregroundStyle(.white.opacity(0.7))
                         }
@@ -73,7 +73,7 @@ struct PreferenceScreen: View {
     private var roomSummary: some View {
         HStack(spacing: 18) {
             Group {
-                if let url = gameKitManager.partyURL {
+                if let url = room.partyURL {
                     PartyQRCodeView(url: url)
                 } else {
                     Image(systemName: "qrcode")
@@ -87,7 +87,7 @@ struct PreferenceScreen: View {
             .frame(width: 112, height: 112)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(gameKitManager.partyCode ?? "No room code")
+                Text(room.partyCode ?? "No room code")
                     .font(.title)
                     .fontWeight(.bold)
                     .monospaced()
@@ -111,7 +111,7 @@ struct PreferenceScreen: View {
     }
 
     private var joinedPlayersText: String {
-        let count = gameKitManager.hasActiveRoom ? gameKitManager.players.count + 1 : 0
+        let count = room.roomMemberCount
         return "\(count) \(count == 1 ? "Person" : "People") Joined"
     }
 
@@ -124,12 +124,24 @@ struct PreferenceScreen: View {
     }
 }
 
-#Preview {
+#if DEBUG
+#Preview("Waiting for players") {
     NavigationStack {
         PreferenceScreen(
-            gameKitManager: .shared,
-            selectedGroups: .constant(Set<BoardGameCategoryGroup>()),
+            room: PreviewRoomSession.waitingForPlayers,
+            selectedGroups: .constant([.fantasyAndSciFi, .partyAndPopCulture]),
             path: .constant(NavigationPath())
         )
     }
 }
+
+#Preview("No room yet") {
+    NavigationStack {
+        PreferenceScreen(
+            room: PreviewRoomSession.ready,
+            selectedGroups: .constant([]),
+            path: .constant(NavigationPath())
+        )
+    }
+}
+#endif

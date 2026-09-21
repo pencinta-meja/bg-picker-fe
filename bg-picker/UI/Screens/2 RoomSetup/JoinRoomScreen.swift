@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct JoinRoomScreen: View {
-    @ObservedObject var gameKitManager: GameKitManager
+    let room: any RoomSession
 
     @State private var roomCode = ""
     @State private var hasAttemptedSubmission = false
@@ -64,7 +64,7 @@ struct JoinRoomScreen: View {
             codeFieldFocused = true
         }
         .onChange(of: roomCode) { _, newValue in
-            let normalized = GameKitManager.normalizePartyCodeInput(newValue)
+            let normalized = PartyCode.normalize(newValue)
             if normalized != newValue {
                 roomCode = normalized
             }
@@ -78,17 +78,17 @@ struct JoinRoomScreen: View {
             Label("Enter all six characters from the host.", systemImage: "exclamationmark.circle.fill")
                 .font(.footnote)
                 .foregroundStyle(.red.opacity(0.92))
-        } else if let error = gameKitManager.errorMessage {
+        } else if let error = room.errorMessage {
             Label(error, systemImage: "exclamationmark.triangle.fill")
                 .font(.footnote)
                 .foregroundStyle(.red.opacity(0.92))
-        } else if !gameKitManager.isAuthenticated || !gameKitManager.isActivityReady {
+        } else if !room.isAuthenticated || !room.isActivityReady {
             HStack(spacing: 8) {
-                if gameKitManager.matchState == .loadingActivity {
+                if room.matchState == .loadingActivity {
                     ProgressView()
                         .tint(.white)
                 }
-                Text(gameKitManager.statusMessage)
+                Text(room.statusMessage)
             }
             .font(.footnote)
             .foregroundStyle(.white.opacity(0.7))
@@ -101,9 +101,9 @@ struct JoinRoomScreen: View {
 
     private var canJoinRoom: Bool {
         roomCode.count == 7
-            && gameKitManager.isAuthenticated
-            && gameKitManager.isActivityReady
-            && !gameKitManager.hasActiveRoom
+            && room.isAuthenticated
+            && room.isActivityReady
+            && !room.hasActiveRoom
     }
 
     private func joinRoom() {
@@ -111,7 +111,7 @@ struct JoinRoomScreen: View {
         guard canJoinRoom else { return }
 
         codeFieldFocused = false
-        gameKitManager.joinRoom(code: roomCode)
+        room.joinRoom(code: roomCode)
     }
 }
 
@@ -165,8 +165,16 @@ private struct PartyCodeField: View {
     }
 }
 
-#Preview {
+#if DEBUG
+#Preview("Ready") {
     NavigationStack {
-        JoinRoomScreen(gameKitManager: .shared)
+        JoinRoomScreen(room: PreviewRoomSession.ready)
     }
 }
+
+#Preview("Activity failed") {
+    NavigationStack {
+        JoinRoomScreen(room: PreviewRoomSession.failed())
+    }
+}
+#endif

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LobbyScreen: View {
-    @ObservedObject var gameKitManager: GameKitManager
+    let room: any RoomSession
 
     @State private var path = NavigationPath()
     @State private var geeklistLink = ""
@@ -68,14 +68,14 @@ struct LobbyScreen: View {
                 switch route {
                 case .createRoom:
                     CreateRoomScreen(
-                        gameKitManager: gameKitManager,
+                        room: room,
                         geeklistLink: $geeklistLink
                     )
                 case .joinRoom:
-                    JoinRoomScreen(gameKitManager: gameKitManager)
+                    JoinRoomScreen(room: room)
                 case .categoryPreference:
                     PreferenceScreen(
-                        gameKitManager: gameKitManager,
+                        room: room,
                         selectedGroups: $selectedGroups,
                         path: $path
                     )
@@ -88,7 +88,7 @@ struct LobbyScreen: View {
             .onAppear {
                 routeToPreferenceIfRoomIsActive()
             }
-            .onChange(of: gameKitManager.partyCode) { _, code in
+            .onChange(of: room.partyCode) { _, code in
                 if code != nil {
                     routeToPreferenceIfRoomIsActive()
                 }
@@ -103,41 +103,41 @@ struct LobbyScreen: View {
     }
 
     private var canEnterRoomSetup: Bool {
-        gameKitManager.isAuthenticated
-            && gameKitManager.isActivityReady
-            && !gameKitManager.hasActiveRoom
+        room.isAuthenticated
+            && room.isActivityReady
+            && !room.hasActiveRoom
     }
 
     private var shouldShowGameCenterStatus: Bool {
-        gameKitManager.errorMessage != nil || !gameKitManager.isActivityReady
+        room.errorMessage != nil || !room.isActivityReady
     }
 
     private var gameCenterStatus: some View {
         HStack(spacing: 10) {
-            if gameKitManager.matchState == .loadingActivity {
+            if room.matchState == .loadingActivity {
                 ProgressView()
                     .tint(.white)
             } else {
-                Image(systemName: gameKitManager.errorMessage == nil
+                Image(systemName: room.errorMessage == nil
                     ? "gamecontroller"
                     : "exclamationmark.triangle.fill")
             }
 
-            Text(gameKitManager.statusMessage)
+            Text(room.statusMessage)
                 .font(.footnote)
                 .multilineTextAlignment(.leading)
 
-            if gameKitManager.isAuthenticated,
-               !gameKitManager.isActivityReady,
-               gameKitManager.matchState != .loadingActivity {
+            if room.isAuthenticated,
+               !room.isActivityReady,
+               room.matchState != .loadingActivity {
                 Button("Retry") {
-                    gameKitManager.authenticate()
+                    room.authenticate()
                 }
                 .font(.footnote.bold())
             }
         }
         .foregroundStyle(
-            gameKitManager.errorMessage == nil
+            room.errorMessage == nil
                 ? .white.opacity(0.72)
                 : Color.red.opacity(0.9)
         )
@@ -145,7 +145,7 @@ struct LobbyScreen: View {
     }
 
     private func routeToPreferenceIfRoomIsActive() {
-        guard gameKitManager.partyCode != nil else { return }
+        guard room.partyCode != nil else { return }
 
         var destination = NavigationPath()
         destination.append(Route.categoryPreference)
@@ -153,8 +153,8 @@ struct LobbyScreen: View {
     }
 
     private func endRoomSetup() {
-        if gameKitManager.hasActiveRoom {
-            gameKitManager.disconnect()
+        if room.hasActiveRoom {
+            room.disconnect()
         }
         geeklistLink = ""
         SessionGameStore.shared.clear()
@@ -162,6 +162,16 @@ struct LobbyScreen: View {
     }
 }
 
-#Preview {
-    LobbyScreen(gameKitManager: .shared)
+#if DEBUG
+#Preview("Ready") {
+    LobbyScreen(room: PreviewRoomSession.ready)
 }
+
+#Preview("Signed out") {
+    LobbyScreen(room: PreviewRoomSession.signedOut)
+}
+
+#Preview("Activity failed") {
+    LobbyScreen(room: PreviewRoomSession.failed())
+}
+#endif
