@@ -68,13 +68,38 @@ decoded `BGGItem`s so later filtering has the domain fields, and `cards` is the 
 deck. `clear()` runs when a room ends, so one room never inherits another's deck. The
 data is not yet shared with matched players through GameKit.
 
+### Navigation
+
+`AppRouter` owns the navigation stack as a typed `[Route]`, and screens express intent
+through it — `push(_:)`, `pop()`, `popToLobby()`, `enterRoom()` — rather than holding a
+`NavigationPath` binding. `RouteDestinationView` is the single `switch` from a `Route` to a
+screen.
+
+The screen that opens a room is the one that routes to it: `CreateRoomScreen` and
+`JoinRoomScreen` each watch their own `room.partyCode` and push the preference screen. The
+lobby only handles the room it did not ask for — Game Center accepting a scanned party link
+while nothing is pushed.
+
+Leaving the room, by button or by back gesture, fires the router's `onFlowEnded`, wired once
+in `App`: it disconnects an active room and clears `SessionGameStore`.
+
 ## Project structure
 
+- `App`: the `@main` entry point and composition root.
 - `Models`: backend-independent presentation/domain values.
-- `Services`: platform boundaries — `GameKitManager` and `BGGService`.
-- `Stores`: `SessionGameStore`, the loaded geeklist games and load status for the current room.
-- `UI/CommonComponents`: reusable visual components and the shared app background.
-- `UI/Screens/RoomSetup`: the four room-setup screens.
-- `UI/Screens/SwipeScreen`: swipe UI and transient swipe state.
-- `ViewTest`: `#if DEBUG` harnesses only; nothing here ships in Release.
-- `Utils`: platform helpers such as haptic feedback.
+- `Services`: platform boundaries — `GameKitManager`, `BGGService`, and the `RoomSession`
+  protocol the UI depends on.
+- `Extensions`: small standard-library helpers.
+- `Credentials`: `SecretVariables` and the untracked `Secrets.xcconfig`.
+- `UI/UIRouter`: `Route`, `AppRouter`, `RouteDestinationView`.
+- `UI/UIStores`: `SessionGameStore`, the loaded geeklist games and load status for the current room.
+- `UI/UIMocks`: `#if DEBUG` conformers for previews, such as `PreviewRoomSession`; nothing here
+  ships in Release.
+- `UI/UIVIew/CommonComponents`: reusable visual components and the shared app background.
+- `UI/UIVIew/Screens`: the room-setup, preference, swipe, and podium screens, plus transient
+  swipe state.
+- `UI/UIResources`: the asset catalogs.
+- `Documentation.docc`: the documentation catalog.
+- `GameCenterResources.gamekit`: the local Game Center configuration resource.
+
+`UIVIew` is spelled that way on disk.

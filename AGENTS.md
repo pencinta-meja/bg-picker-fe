@@ -15,14 +15,21 @@ Game Center owns player authentication, party-code matchmaking, match lifecycle,
 
 ## Source Layout
 
-- `bg-picker/Services`: platform integration boundaries — `GameKitManager` and `BGGService`.
+- `bg-picker/App`: the `@main` entry point. Composition root — the only place that builds `GameKitManager.shared` and `AppRouter` and wires them together.
+- `bg-picker/Services`: platform integration boundaries — `GameKitManager`, `BGGService`, and the `RoomSession` protocol the UI depends on.
 - `bg-picker/Models`: backend-independent domain and presentation values.
-- `bg-picker/UI/CommonComponents`: shared SwiftUI components.
-- `bg-picker/UI/Screens`: feature-organized SwiftUI screens and transient view models.
-- `bg-picker/Stores`: in-memory session state shared across screens, cleared when a room ends.
-- `bg-picker/Utils`: platform helpers such as haptics.
-- `bg-picker/ViewTest`: `#if DEBUG` harnesses only. Nothing here ships in Release.
-- `bg-picker/Resources/Images.xcassets`: app colors, icons, and images.
+- `bg-picker/Extensions`: small standard-library helpers such as `Array+Chunk`.
+- `bg-picker/Credentials`: `SecretVariables` plus the untracked `Secrets.xcconfig`.
+- `bg-picker/UI/UIRouter`: navigation — `Route`, `AppRouter`, and `RouteDestinationView`.
+- `bg-picker/UI/UIStores`: in-memory session state shared across screens, cleared when a room ends.
+- `bg-picker/UI/UIMocks`: `#if DEBUG` conformers for previews. Nothing here ships in Release.
+- `bg-picker/UI/UIVIew/CommonComponents`: shared SwiftUI components.
+- `bg-picker/UI/UIVIew/Screens`: feature-organized SwiftUI screens and transient view models.
+- `bg-picker/UI/UIResources`: `Assets`, `Colors`, and `Images` asset catalogs.
+- `bg-picker/Documentation.docc`: the documentation catalog.
+- `bg-picker/GameCenterResources.gamekit`: the local Game Center configuration resource.
+
+`UIVIew` is spelled that way on disk. Match it or rename the folder deliberately; do not guess at `UIView`.
 
 The Xcode project uses a file-system-synchronized root group. New Swift files placed inside `bg-picker/` are normally discovered automatically and should not require manual `project.pbxproj` source entries.
 
@@ -31,7 +38,7 @@ The Xcode project uses a file-system-synchronized root group. New Swift files pl
 `RoomSession` (`bg-picker/Services/RoomSession.swift`) is the frontend-facing multiplayer boundary. Screens hold `any RoomSession` and never name a concrete type, so matchmaking behavior stays out of UI code.
 
 - `GameKitManager.shared` is the production conformer and the only type that imports GameKit.
-- `PreviewRoomSession` (`bg-picker/ViewTest`, `#if DEBUG`) is the preview conformer. It poses the screens in any state without authenticating — which matters because contributors hold separate Individual memberships, so only the App ID's owner can sign in at all.
+- `PreviewRoomSession` (`bg-picker/UI/UIMocks`, `#if DEBUG`) is the preview conformer. It poses the screens in any state without authenticating — which matters because contributors hold separate Individual memberships, so only the App ID's owner can sign in at all.
 
 The protocol carries what the UI reads — `isAuthenticated`, `isActivityReady`, `hasActiveRoom`, `matchState`, `statusMessage`, `errorMessage`, `partyCode`, `partyURL`, `roomMemberCount`, `presentedViewController` — plus `authenticate()`, `createRoom()`, `joinRoom(code:)`, `disconnect()` and `dismissPresentedController()`. `players` stays off it: `GKPlayer` has no public initializer, so no fake can produce one and the UI gets `roomMemberCount` (local player included) instead.
 
@@ -45,14 +52,26 @@ Do not reintroduce `GKMatchmakerViewController`, custom server room IDs, or back
 
 QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Image. The receiving player scans them with the system Camera; an in-app scanner is not currently part of the product.
 
+## Navigation
+
+`AppRouter` (`bg-picker/UI/UIRouter`) is the coordinator. It owns the stack as a typed `[Route]` — not `NavigationPath`, which erases its elements and would hide whether the room screen is still present — and every write funnels through one private `update(to:)`, including the writes SwiftUI makes itself when the user swipes back.
+
+- Screens never hold a `NavigationPath` or a path `Binding`. They take `AppRouter` and call `push(_:)`, `pop()`, `popToLobby()` or `enterRoom()`.
+- `RouteDestinationView` is the single `switch` from `Route` to a screen. `LobbyScreen` hands every destination to it.
+- **The screen that opens a room routes to it.** `CreateRoomScreen` and `JoinRoomScreen` each watch their own `room.partyCode` and push `.categoryPreference`. The lobby does not reach forward on their behalf.
+- `LobbyScreen` keeps exactly one forward move, guarded by `router.isAtLobby`: a room that arrives through `player(_:wantsToPlay:)` when another player accepts a party link and no setup screen is open.
+- `onFlowEnded` fires when `.categoryPreference` leaves the stack or the stack empties, and is wired once in `bg-picker/App`. It disconnects the room if one is active and clears `SessionGameStore`. It is deliberately safe to run twice.
+
+Do not put flow lifecycle back into a screen: no `NavigationPath` rebuilding, and no reading `path.count` as a proxy for "the user went back".
+
 ## Implementation Rules
 
 - Keep session data transient and in memory.
 - BGG exposes two different link axes: `boardgamecategory` (what a game is about) and `boardgamemechanic` (how it is played). This app models categories only, as `BoardGameCategory`, folded into 13 pickable `BoardGameCategoryGroup`s. Do not reintroduce a type named `Mechanic` holding category values.
-- Fetched session data belongs in a store under `bg-picker/Stores`, reached through its `.shared` instance. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
+- Fetched session data belongs in a store under `bg-picker/UI/UIStores`, reached through its `.shared` instance. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
 - Give stores an internal `init()` alongside `.shared` so previews and tests can use an isolated instance.
 - Keep networking and platform APIs behind focused service types.
-- Keep SwiftUI views declarative; move lifecycle and matchmaking decisions into `GameKitManager`.
+- Keep SwiftUI views declarative; move matchmaking decisions into `GameKitManager` and navigation decisions into `AppRouter`.
 - Represent loading, unavailable, empty, waiting, connected, cancelled, and failure states honestly.
 - Do not add sample games or simulated multiplayer success to runtime code.
 - Prefer Apple frameworks over new dependencies when they already provide the required capability.
