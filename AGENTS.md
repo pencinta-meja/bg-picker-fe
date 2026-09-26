@@ -21,8 +21,10 @@ Game Center owns player authentication, party-code matchmaking, match lifecycle,
 - `bg-picker/Extensions`: small standard-library helpers such as `Array+Chunk`.
 - `bg-picker/Credentials`: `SecretVariables` plus the untracked `Secrets.xcconfig`.
 - `bg-picker/UI/UIRouter`: navigation — `Route`, `AppRouter`, and `RouteDestinationView`.
-- `bg-picker/UI/UIStores`: in-memory session state shared across screens, cleared when a room ends.
-- `bg-picker/UI/UIMocks`: `#if DEBUG` conformers for previews. Nothing here ships in Release.
+- `bg-picker/UI/UIStores`: in-memory session state shared across screens, cleared when a room ends —
+  the `SessionGameStorage` protocol and its production conformer `SessionGameStore`.
+- `bg-picker/UI/UIMocks`: `#if DEBUG` conformers and fixtures for previews, one folder per
+  boundary. Nothing here ships in Release.
 - `bg-picker/UI/UIVIew/CommonComponents`: shared SwiftUI components.
 - `bg-picker/UI/UIVIew/Screens`: feature-organized SwiftUI screens and transient view models.
 - `bg-picker/UI/UIResources`: `Assets`, `Colors`, and `Images` asset catalogs.
@@ -44,13 +46,24 @@ The protocol carries what the UI reads — `isAuthenticated`, `isActivityReady`,
 
 Packet traffic — `send(_:type:reliably:)`, `receivedPackets`, `onPacketReceived` — is still `GameKitManager`-only. Add it to `RoomSession` when a screen needs it, not before.
 
-`GameKitManager` is `@Observable` rather than `ObservableObject`, because `@ObservedObject` cannot hold a protocol while Observation tracks reads made through `any RoomSession` correctly. `PartyCode.normalize(_:)` sits in the same file for party-code text formatting that involves no GameKit.
+`GameKitManager` is `@Observable` rather than `ObservableObject`, because `@ObservedObject` cannot hold a protocol while Observation tracks reads made through `any RoomSession` correctly. The same rule applies to any type the UI observes through a protocol — see `SessionGameStorage` below. A concrete per-screen view model with no protocol behind it, such as `SwipeViewModel`, stays `ObservableObject`. `PartyCode.normalize(_:)` sits in the same file for party-code text formatting that involves no GameKit.
 
 The required Game Activity identifier is `boardgameroom`. It must be configured in App Store Connect with party-code support, synchronous play, and a 2–6 player range.
 
 Do not reintroduce `GKMatchmakerViewController`, custom server room IDs, or backend matchmaking unless the product requirements explicitly change.
 
 QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Image. The receiving player scans them with the system Camera; an in-app scanner is not currently part of the product.
+
+## Session Store Architecture
+
+`SessionGameStorage` (`bg-picker/UI/UIStores/SessionGameStorage.swift`) is the frontend-facing boundary for the current room's game data, built the same way as `RoomSession`. Screens hold `any SessionGameStorage`, defaulted to `SessionGameStore.shared` so the router does not prop-drill it.
+
+- `SessionGameStore.shared` is the production conformer and the only type that calls `BGGService`.
+- `PreviewSessionGameStore` (`bg-picker/UI/UIMocks/SessionGameStorage`, `#if DEBUG`) is the preview conformer, posing `.idle`, `.loading`, `.loaded`, loaded-but-empty and `.failed` without a network request. Its `BGGItem` fixtures live beside it in `PreviewBoardGames`.
+- The protocol carries `state`, `games`, `cards`, `load(geeklistID:)` and `clear()`, plus `isLoading`/`hasGames` as a protocol extension so there is one implementation. `SessionGameLoadState` is top level rather than nested, so the protocol never names a conformer.
+- `load(fromInput:)` stays on `SessionGameStore`: no screen calls it. Add it to the protocol when one does, not before.
+
+Both conformers derive `cards` from `games` inside a single private `apply(state:games:)`, so status and data cannot diverge and a mock cannot pose a state the real store could never reach. The store property is `var` rather than `let` only because a defaulted `let` is omitted from the memberwise init previews use to inject.
 
 ## Navigation
 
@@ -68,12 +81,14 @@ Do not put flow lifecycle back into a screen: no `NavigationPath` rebuilding, an
 
 - Keep session data transient and in memory.
 - BGG exposes two different link axes: `boardgamecategory` (what a game is about) and `boardgamemechanic` (how it is played). This app models categories only, as `BoardGameCategory`, folded into 13 pickable `BoardGameCategoryGroup`s. Do not reintroduce a type named `Mechanic` holding category values.
-- Fetched session data belongs in a store under `bg-picker/UI/UIStores`, reached through its `.shared` instance. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
+- Fetched session data belongs in a store under `bg-picker/UI/UIStores`, reached through a protocol with its `.shared` instance as the default: `var store: any SessionGameStorage = SessionGameStore.shared`. A view model holds only its own screen's state — if two screens need the same data, it is store state, not view-model state.
 - Give stores an internal `init()` alongside `.shared` so previews and tests can use an isolated instance.
 - Keep networking and platform APIs behind focused service types.
 - Keep SwiftUI views declarative; move matchmaking decisions into `GameKitManager` and navigation decisions into `AppRouter`.
 - Represent loading, unavailable, empty, waiting, connected, cancelled, and failure states honestly.
-- Do not add sample games or simulated multiplayer success to runtime code.
+- Do not add sample games or simulated multiplayer success to runtime code. DEBUG-only fixtures
+  under `bg-picker/UI/UIMocks`, referenced solely by previews, are the sanctioned exception —
+  verify with a Release build, which is where an unfenced reference fails.
 - Prefer Apple frameworks over new dependencies when they already provide the required capability.
 - Preserve the purple visual language and existing reusable components unless a design change is requested.
 - Use `@MainActor` for UI-observed services and handle GameKit callback isolation explicitly.

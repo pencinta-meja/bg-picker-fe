@@ -4,6 +4,10 @@
 //
 //  Holds the games loaded for the current room, and the status of that load.
 //
+//  The production conformer of `SessionGameStorage`; `PreviewSessionGameStore` is the
+//  DEBUG-only one. Screens hold `any SessionGameStorage` and never name this type,
+//  except the composition root in `App`, which owns the lifecycle.
+//
 //  This is deliberately a store rather than a view model: the data outlives any one
 //  screen. The load is started on CreateRoomScreen and observed on SwipeScreen, so a
 //  per-view owner would render `.idle` over a request that is still in flight.
@@ -12,36 +16,29 @@
 //
 
 import Foundation
-import Combine
+import Observation
 
+/// `@Observable` rather than `ObservableObject`, because `@ObservedObject` cannot hold a
+/// protocol while Observation tracks reads made through `any SessionGameStorage`
+/// correctly. Same reason `GameKitManager` is `@Observable`.
+@Observable
 @MainActor
-final class SessionGameStore: ObservableObject {
-    enum LoadState: Equatable {
-        case idle
-        case loading
-        /// Loaded with no cards means the geeklist genuinely had no board games —
-        /// a result, not a failure, and not a spinner that never resolves.
-        case loaded
-        case failed(String)
-    }
-
+final class SessionGameStore: SessionGameStorage {
     static let shared = SessionGameStore()
 
     /// Internal rather than `private` (unlike `GameKitManager`'s) so previews and
     /// tests can build an isolated instance instead of mutating shared state.
     init() {}
 
-    @Published private(set) var state: LoadState = .idle
+    private(set) var state: SessionGameLoadState = .idle
     /// Canonical fetched data. Kept as `BGGItem` rather than only the mapped cards so
     /// later filtering (mechanics, player count) still has the domain fields.
-    @Published private(set) var games: [BGGItem] = []
+    private(set) var games: [BGGItem] = []
     /// Derived once when the load finishes, not recomputed on every render.
-    @Published private(set) var cards: [BoardGameCard] = []
+    private(set) var cards: [BoardGameCard] = []
 
-    private var loadTask: Task<Void, Never>?
-
-    var isLoading: Bool { state == .loading }
-    var hasGames: Bool { !cards.isEmpty }
+    /// Control state no view reads, so it stays out of the observation registrar.
+    @ObservationIgnored private var loadTask: Task<Void, Never>?
 
     func load(geeklistID: String) {
         loadTask?.cancel()
@@ -63,6 +60,8 @@ final class SessionGameStore: ObservableObject {
 
     /// Parses a pasted URL or a typed id, then loads. Returns false if the input
     /// carried no usable geeklist id.
+    ///
+    /// Off `SessionGameStorage`: no screen calls it yet, so it stays concrete.
     @discardableResult
     func load(fromInput input: String) -> Bool {
         guard let id = BGGService.geeklistID(from: input) else { return false }
@@ -79,7 +78,7 @@ final class SessionGameStore: ObservableObject {
     }
 
     /// The single place status and data change together, so the two cannot diverge.
-    private func apply(state: LoadState, games: [BGGItem]) {
+    private func apply(state: SessionGameLoadState, games: [BGGItem]) {
         self.state = state
         self.games = games
         self.cards = games.map(BoardGameCard.init(item:))

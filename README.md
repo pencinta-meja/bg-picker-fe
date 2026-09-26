@@ -68,6 +68,12 @@ decoded `BGGItem`s so later filtering has the domain fields, and `cards` is the 
 deck. `clear()` runs when a room ends, so one room never inherits another's deck. The
 data is not yet shared with matched players through GameKit.
 
+Screens reach that data through the `SessionGameStorage` protocol rather than the concrete
+store: call `load(geeklistID:)`, observe `state` and `cards`, and let the router's
+`onFlowEnded` call `clear()`. The DEBUG-only `PreviewSessionGameStore` conforms to it with
+fixtures from `PreviewBoardGames`, so the swipe screen can be built in a preview without a
+room, a sign-in, or a BGG request.
+
 ### Navigation
 
 `AppRouter` owns the navigation stack as a typed `[Route]`, and screens express intent
@@ -92,9 +98,10 @@ in `App`: it disconnects an active room and clears `SessionGameStore`.
 - `Extensions`: small standard-library helpers.
 - `Credentials`: `SecretVariables` and the untracked `Secrets.xcconfig`.
 - `UI/UIRouter`: `Route`, `AppRouter`, `RouteDestinationView`.
-- `UI/UIStores`: `SessionGameStore`, the loaded geeklist games and load status for the current room.
-- `UI/UIMocks`: `#if DEBUG` conformers for previews, such as `PreviewRoomSession`; nothing here
-  ships in Release.
+- `UI/UIStores`: the `SessionGameStorage` protocol the UI depends on, and `SessionGameStore` —
+  the loaded geeklist games and load status for the current room.
+- `UI/UIMocks`: `#if DEBUG` conformers and fixtures for previews — `PreviewRoomSession`,
+  `PreviewSessionGameStore`, `PreviewBoardGames`; nothing here ships in Release.
 - `UI/UIVIew/CommonComponents`: reusable visual components and the shared app background.
 - `UI/UIVIew/Screens`: the room-setup, preference, swipe, and podium screens, plus transient
   swipe state.

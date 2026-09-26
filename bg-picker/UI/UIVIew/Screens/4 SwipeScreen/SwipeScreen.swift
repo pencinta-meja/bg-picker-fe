@@ -11,7 +11,12 @@ struct SwipeScreen: View {
     let router: AppRouter
     // Defaulted rather than required: no prop-drilling, but previews and the debug
     // harness can still inject an isolated store.
-    @ObservedObject var store: SessionGameStore = .shared
+    //
+    // A plain property, not @ObservedObject, which cannot hold a protocol: Observation
+    // registers the reads `body` makes through the existential instead. `var` rather
+    // than `let` only because a defaulted `let` is left out of the memberwise init,
+    // which is how previews inject their own.
+    var store: any SessionGameStorage = SessionGameStore.shared
 
     // @StateObject, not @ObservedObject: this view owns the deck. An @ObservedObject
     // initialised inline is re-created whenever SwiftUI re-inits the view, which
@@ -113,6 +118,24 @@ struct SwipeScreen: View {
     }
 }
 
-#Preview {
-    SwipeScreen(router: AppRouter(), store: SessionGameStore())
+#if DEBUG
+#Preview("Loaded deck") {
+    SwipeScreen(router: AppRouter(), store: PreviewSessionGameStore.loaded)
 }
+
+#Preview("Last card") {
+    SwipeScreen(router: AppRouter(), store: PreviewSessionGameStore.lastCard)
+}
+
+#Preview("Loading") {
+    SwipeScreen(router: AppRouter(), store: PreviewSessionGameStore.loading)
+}
+
+#Preview("Empty geeklist") {
+    SwipeScreen(router: AppRouter(), store: PreviewSessionGameStore.loadedEmpty)
+}
+
+#Preview("Failed") {
+    SwipeScreen(router: AppRouter(), store: PreviewSessionGameStore.failed())
+}
+#endif

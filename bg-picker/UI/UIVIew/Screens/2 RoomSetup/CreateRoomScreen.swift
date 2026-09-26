@@ -3,7 +3,11 @@ import SwiftUI
 struct CreateRoomScreen: View {
     let room: any RoomSession
     let router: AppRouter
-    @ObservedObject var store: SessionGameStore = .shared
+    // A plain property, not @ObservedObject, which cannot hold a protocol: Observation
+    // registers the reads `body` makes through the existential instead. `var` rather
+    // than `let` only because a defaulted `let` is left out of the memberwise init,
+    // which is how previews inject their own.
+    var store: any SessionGameStorage = SessionGameStore.shared
 
     @State private var geeklistLink = ""
     @State private var hasAttemptedSubmission = false
@@ -163,7 +167,7 @@ struct CreateRoomScreen: View {
         CreateRoomScreen(
             room: PreviewRoomSession.ready,
             router: AppRouter(),
-            store: SessionGameStore()
+            store: PreviewSessionGameStore.idle
         )
     }
 }
@@ -173,7 +177,7 @@ struct CreateRoomScreen: View {
         CreateRoomScreen(
             room: PreviewRoomSession.loadingActivity,
             router: AppRouter(),
-            store: SessionGameStore()
+            store: PreviewSessionGameStore.idle
         )
     }
 }
