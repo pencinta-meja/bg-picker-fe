@@ -10,7 +10,7 @@
 //  App ID's owner can authenticate at all.
 //
 //  `GameKitManager.shared` is the production conformer; `PreviewRoomSession` under
-//  `ViewTest` is the DEBUG-only one.
+//  `UI/UIMocks` is the DEBUG-only one.
 //
 //  Only what the UI actually reads belongs here. Packet send/receive stays on
 //  `GameKitManager` until a screen needs it.
@@ -47,11 +47,32 @@ protocol RoomSession: AnyObject, Observable {
     var roomMemberCount: Int { get }
     var presentedViewController: UIViewController? { get }
 
+    // Shared game-session state. These are domain values rather than GameKit types so
+    // screens and previews use the same interface.
+    var gamePhase: RoomGamePhase { get }
+    var isLocalHost: Bool { get }
+    var localIsReady: Bool { get }
+    var canStartGame: Bool { get }
+    var canFinishSwiping: Bool { get }
+    var participants: [RoomParticipant] { get }
+    var canonicalDeck: [BoardGameCard] { get }
+    var localSwipeProgress: RoomSwipeProgress { get }
+    var resultGroups: [RoomResultGroup] { get }
+    var finishedPlayerCount: Int { get }
+    var hasPendingResults: Bool { get }
+    var sessionError: String? { get }
+
     func authenticate()
     func createRoom()
     func joinRoom(code: String)
     func disconnect()
     func dismissPresentedController()
+    func setReady(categories: Set<BoardGameCategoryGroup>)
+    func setNotReady()
+    func startGame()
+    func recordDecision(gameID: String, accepted: Bool)
+    func finishSwiping()
+    func refreshResults()
 }
 
 /// Party-code text handling. Pure string work with no GameKit in it, so a view can format

@@ -10,7 +10,7 @@ struct SwipeableCardsView: View {
     private let swipeThreshold: CGFloat = 100.0
     private let rotationFactor: Double = 35.0
     
-    var action: (SwipeViewModel) -> Void
+    var onDecision: (String, BoardGameCard.SwipeDirection) -> Void
     
     var body: some View {
         GeometryReader { geometry in
@@ -48,6 +48,7 @@ struct SwipeableCardsView: View {
                                 .onEnded { _ in
                                     if abs(self.dragState.width) > swipeThreshold {
                                         let swipeDirection: BoardGameCard.SwipeDirection = self.dragState.width > 0 ? .right : .left
+                                        guard let gameID = swipeableViewModel.unswipedCards.first?.id else { return }
                                         swipeableViewModel.updateTopCardSwipeDirection(swipeDirection)
                                         
                                         withAnimation(.easeOut(duration: 0.5)) {
@@ -55,6 +56,7 @@ struct SwipeableCardsView: View {
                                         }
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                             self.swipeableViewModel.removeTopCard()
+                                            self.onDecision(gameID, swipeDirection)
                                             self.dragState = .zero
                                         }
                                     } else {

@@ -15,7 +15,6 @@ struct PreferenceScreen: View {
         AppBackground {
             ScrollView {
                 VStack(spacing: 24) {
-                    
                     roomSummary
 
                     LazyVGrid(columns: columns, spacing: 12) {
@@ -26,49 +25,40 @@ struct PreferenceScreen: View {
                             ) {
                                 toggle(group)
                             }
+                            .disabled(room.localIsReady || room.gamePhase == .started)
                         }
                     }
 
-                    if let error = room.errorMessage {
-                        Label(error, systemImage: "exclamationmark.triangle.fill")
-                            .font(.footnote)
-                            .foregroundStyle(.red.opacity(0.92))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } else if room.matchState == .matchmaking {
-                        HStack(spacing: 10) {
-                            ProgressView()
-                                .tint(.white)
-                            Text(room.statusMessage)
-                                .font(.footnote)
-                                .foregroundStyle(.white.opacity(0.7))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    sessionStatus
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 34)
-                .padding(.bottom, 24)
+                .padding(.bottom, 170)
             }
             .scrollIndicators(.hidden)
             .safeAreaInset(edge: .bottom) {
-                PrimaryButton(title: "Next") {
-                    router.push(.swiping)
-                }
-                .padding(.horizontal, 36)
-                .padding(.vertical, 16)
-                .background(
-                    LinearGradient(
-                        colors: [.clear, Color(red: 0.28, green: 0, blue: 0.48).opacity(0.96)],
-                        startPoint: .top,
-                        endPoint: .center
+                actionArea
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [.clear, Color(red: 0.28, green: 0, blue: 0.48).opacity(0.96)],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
                     )
-                )
             }
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .onChange(of: room.gamePhase, initial: true) { _, _ in
+            routeForCurrentSession()
+        }
+        .onChange(of: room.localSwipeProgress.isFinished, initial: true) { _, _ in
+            routeForCurrentSession()
+        }
     }
 
     private var roomSummary: some View {
@@ -89,14 +79,18 @@ struct PreferenceScreen: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(room.partyCode ?? "No room code")
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.title.bold())
                     .monospaced()
                     .minimumScaleFactor(0.72)
                     .lineLimit(1)
 
                 Text(joinedPlayersText)
                     .font(.body)
+
+                if room.isLocalHost {
+                    Label("Host", systemImage: "crown.fill")
+                        .font(.caption.bold())
+                }
             }
             .foregroundStyle(.black)
 
@@ -111,9 +105,77 @@ struct PreferenceScreen: View {
         }
     }
 
+    @ViewBuilder
+    private var sessionStatus: some View {
+        if let message = room.sessionError ?? room.errorMessage {
+            Label(message, systemImage: "exclamationmark.triangle.fill")
+                .foregroundStyle(.red.opacity(0.92))
+        } else {
+            HStack(spacing: 10) {
+                if room.gamePhase == .synchronizing || room.matchState == .matchmaking {
+                    ProgressView().tint(.white)
+                }
+                Text(statusText)
+            }
+            .foregroundStyle(.white.opacity(0.76))
+        }
+    }
+
+    @ViewBuilder
+    private var actionArea: some View {
+        VStack(spacing: 12) {
+            if room.gamePhase == .lockedOut || room.gamePhase == .failed {
+                PrimaryButton(title: "Leave Room") {
+                    router.popToLobby()
+                }
+            } else if !room.localIsReady {
+                PrimaryButton(title: "Next") {
+                    room.setReady(categories: selectedGroups)
+                }
+                .disabled(room.gamePhase == .started)
+            } else if room.isLocalHost {
+                PrimaryButton(title: "Start Game") {
+                    room.startGame()
+                }
+                .disabled(!room.canStartGame)
+
+                PrimaryButton(title: "Edit Preferences", style: .outlined) {
+                    room.setNotReady()
+                }
+            } else {
+                PrimaryButton(title: "Waiting for Host…") {}
+                    .disabled(true)
+
+                PrimaryButton(title: "Edit Preferences", style: .outlined) {
+                    room.setNotReady()
+                }
+            }
+        }
+    }
+
     private var joinedPlayersText: String {
         let count = room.roomMemberCount
         return "\(count) \(count == 1 ? "Person" : "People") Joined"
+    }
+
+    private var statusText: String {
+        switch room.gamePhase {
+        case .idle, .waitingForPlayers:
+            return "Waiting for at least one more player."
+        case .synchronizing:
+            return "Synchronizing the host’s geeklist…"
+        case .waitingForReady:
+            let ready = room.participants.filter(\.isReady).count
+            return "\(ready) of \(room.participants.count) players ready."
+        case .readyToStart:
+            return room.isLocalHost ? "Everyone is ready. Start when you are ready." : "Everyone is ready. Waiting for the host."
+        case .started:
+            return "The game has started."
+        case .lockedOut:
+            return "This room has already started."
+        case .failed:
+            return "The room needs attention."
+        }
     }
 
     private func toggle(_ group: BoardGameCategoryGroup) {
@@ -123,24 +185,33 @@ struct PreferenceScreen: View {
             selectedGroups.insert(group)
         }
     }
-}
 
-#if DEBUG
-#Preview("Waiting for players") {
-    NavigationStack {
-        PreferenceScreen(
-            room: PreviewRoomSession.waitingForPlayers,
-            router: AppRouter()
-        )
+    private func routeForCurrentSession() {
+        guard room.gamePhase == .started else { return }
+        if room.localSwipeProgress.isFinished {
+            if !router.contains(.podium) { router.push(.podium) }
+        } else if !router.contains(.swiping) {
+            router.push(.swiping)
+        }
     }
 }
 
-#Preview("No room yet") {
+#if DEBUG
+#Preview("Host ready") {
     NavigationStack {
-        PreferenceScreen(
-            room: PreviewRoomSession.ready,
-            router: AppRouter()
-        )
+        PreferenceScreen(room: PreviewRoomSession.hostReadyToStart, router: AppRouter())
+    }
+}
+
+#Preview("Waiting") {
+    NavigationStack {
+        PreferenceScreen(room: PreviewRoomSession.waitingForPlayers, router: AppRouter())
+    }
+}
+
+#Preview("Late join") {
+    NavigationStack {
+        PreferenceScreen(room: PreviewRoomSession.lateJoinLocked, router: AppRouter())
     }
 }
 #endif

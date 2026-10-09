@@ -1,67 +1,63 @@
-//
-//  PodiumCard.swift
-//  bg-picker
-//
-//  Created by Jayvin Tiya Silo on 06/05/26.
-//
-
-
 import SwiftUI
 
 struct PodiumCard: View {
-    let title: String
-    let images: [String]
+    let group: RoomResultGroup
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.title2)
-                .bold()
+        VStack(alignment: .leading, spacing: 12) {
+            Text(group.title)
+                .font(.title2.bold())
                 .foregroundStyle(.white)
-                .padding(.horizontal)
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(images, id: \.self) { imageUrl in
-                        AsyncImage(url: URL(string: imageUrl)!) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 109, height: 169)
+                    ForEach(group.cards) { card in
+                        VStack(alignment: .leading, spacing: 6) {
+                            artwork(for: card)
+                                .frame(width: 109, height: 150)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
-                        } placeholder: {
-                            // Placeholder image while loading
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                .frame(width: 109, height: 169)
+
+                            Text(card.title)
+                                .font(.caption.bold())
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                                .frame(width: 109, alignment: .leading)
                         }
-//                        }
-//                        Image(imageName)
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 109, height: 169)
-//                            .clipShape(RoundedRectangle(cornerRadius: 12))
-//                            .overlay(
-//                                RoundedRectangle(cornerRadius: 12)
-//                                    .stroke(Color.white, lineWidth: 2)
-//                            )
                     }
                 }
-                .padding(.horizontal)
             }
         }
-        .padding(24)
-        .fixedSize(horizontal: false, vertical: true)
-        .background(Color.gray.opacity(0.3))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
     }
-}
-    
 
-#Preview {
-    PodiumCard(title: "Results", images: [])
+    @ViewBuilder
+    private func artwork(for card: BoardGameCard) -> some View {
+        if let local = card.thumbnailLocalImage {
+            Image(uiImage: local)
+                .resizable()
+                .scaledToFill()
+        } else if let url = card.thumbnailURL {
+            AsyncImage(url: url) { phase in
+                if let image = phase.image {
+                    image.resizable().scaledToFill()
+                } else if phase.error != nil {
+                    placeholder
+                } else {
+                    ProgressView().tint(.white)
+                }
+            }
+        } else {
+            placeholder
+        }
+    }
+
+    private var placeholder: some View {
+        ZStack {
+            Color.white.opacity(0.08)
+            Image(systemName: "photo")
+                .foregroundStyle(.white.opacity(0.6))
+        }
+    }
 }

@@ -6,7 +6,7 @@
     "gameActivities" : [
       {
         "archived" : false,
-        "maximumPlayersCount" : 10,
+        "maximumPlayersCount" : 6,
         "minimumPlayersCount" : 2,
         "playStyle" : null,
         "properties" : {

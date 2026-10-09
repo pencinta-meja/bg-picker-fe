@@ -28,6 +28,7 @@ Game Center owns player authentication, party-code matchmaking, match lifecycle,
 - `bg-picker/UI/UIResources`: `Assets`, `Colors`, and `Images` asset catalogs.
 - `bg-picker/Documentation.docc`: the documentation catalog.
 - `bg-picker/GameCenterResources.gamekit`: the local Game Center configuration resource.
+- `bg-pickerTests`: unit coverage for the pure reducer and isolated in-memory session store.
 
 `UIVIew` is spelled that way on disk. Match it or rename the folder deliberately; do not guess at `UIView`.
 
@@ -40,9 +41,11 @@ The Xcode project uses a file-system-synchronized root group. New Swift files pl
 - `GameKitManager.shared` is the production conformer and the only type that imports GameKit.
 - `PreviewRoomSession` (`bg-picker/UI/UIMocks`, `#if DEBUG`) is the preview conformer. It poses the screens in any state without authenticating — which matters because contributors hold separate Individual memberships, so only the App ID's owner can sign in at all.
 
-The protocol carries what the UI reads — `isAuthenticated`, `isActivityReady`, `hasActiveRoom`, `matchState`, `statusMessage`, `errorMessage`, `partyCode`, `partyURL`, `roomMemberCount`, `presentedViewController` — plus `authenticate()`, `createRoom()`, `joinRoom(code:)`, `disconnect()` and `dismissPresentedController()`. `players` stays off it: `GKPlayer` has no public initializer, so no fake can produce one and the UI gets `roomMemberCount` (local player included) instead.
+The protocol carries authentication and room presentation state plus domain-level session state: phase, host status, participants, readiness, canonical deck, local progress, displayed result groups, pending-result state, and session errors. Its game actions are `setReady(categories:)`, `setNotReady()`, `startGame()`, `recordDecision(gameID:accepted:)`, `finishSwiping()`, and `refreshResults()`. `GKPlayer` and encoded packets never cross this boundary.
 
-Packet traffic — `send(_:type:reliably:)`, `receivedPackets`, `onPacketReceived` — is still `GameKitManager`-only. Add it to `RoomSession` when a screen needs it, not before.
+`SessionGameStore` is the transient source of truth for the replicated room. `RoomSessionReducer` contains deterministic rules shared by production, previews, and tests. `GameKitManager` converts platform callbacks and versioned packets into store events; `PreviewRoomSession` drives the same reducer rules with deterministic DEBUG-only values.
+
+The host sends complete encoded `BGGItem` source data in reliable 24 KiB chunks with a session ID, message ID, revision, and SHA-256 checksum. Smaller preference and progress payloads are revisioned and idempotent. Malformed, duplicate, stale, or foreign-session messages must not mutate the room. The generic `send(_:type:reliably:)`, `receivedPackets`, and `onPacketReceived` APIs remain `GameKitManager`-only for future non-session traffic.
 
 `GameKitManager` is `@Observable` rather than `ObservableObject`, because `@ObservedObject` cannot hold a protocol while Observation tracks reads made through `any RoomSession` correctly. `PartyCode.normalize(_:)` sits in the same file for party-code text formatting that involves no GameKit.
 
@@ -51,6 +54,18 @@ The required Game Activity identifier is `boardgameroom`. It must be configured 
 Do not reintroduce `GKMatchmakerViewController`, custom server room IDs, or backend matchmaking unless the product requirements explicitly change.
 
 QR codes contain `GKGameActivity.partyURL` and are rendered locally with Core Image. The receiving player scans them with the system Camera; an in-app scanner is not currently part of the product.
+
+### Session Business Rules
+
+- Category preferences are a union. If nobody selects a group, use the full geeklist.
+- Only the current authority starts, after at least two connected players are ready, source-synchronized, and the union has a match.
+- Start freezes both the eligible roster and canonical shuffled deck.
+- Unknown identities are locked out after Start. A frozen identity may reconnect and restore its prior progress.
+- Each swipe publishes a monotonically revisioned full progress snapshot. A finished submission is permanent; accepting zero games is valid.
+- Rankings use only finished submissions. Their denominator is the number finished, zero-vote games are omitted, and ties follow canonical deck order.
+- Incoming finished submissions set a pending indicator. Displayed rankings change only on explicit refresh or Podium reopen.
+- If authority disconnects, elect the connected frozen player with the lexicographically lowest Game Center player ID. The old host does not reclaim authority on return.
+- The Game Activity stays open after Start for known-player reconnection. If all peers leave, report the room as unrecoverable.
 
 ## Navigation
 
@@ -100,9 +115,10 @@ xcodebuild \
 Before handing off a change:
 
 1. Run `git diff --check`.
-2. Build for generic iOS with code signing disabled.
-3. Search for stale references when removing or renaming a feature.
-4. For GameKit behavior, describe any real-device checks that remain. End-to-end matchmaking requires Game Center-enabled accounts and the App Store Connect activity configuration.
+2. Run the `bg-pickerTests` suite on an installed iOS simulator when session rules changed.
+3. Build for generic iOS with code signing disabled.
+4. Search for stale references when removing or renaming a feature.
+5. For GameKit behavior, describe any real-device checks that remain. End-to-end matchmaking requires Game Center-enabled accounts and the App Store Connect activity configuration.
 
 Do not treat simulator-only behavior as proof that Game Center matchmaking works. Use at least two eligible players/devices for the final multiplayer test.
 

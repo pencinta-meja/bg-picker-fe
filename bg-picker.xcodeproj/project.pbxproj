@@ -6,12 +6,23 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000000006 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB5172522FA5FD5D00DF0C85 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FB5172592FA5FD5D00DF0C85;
+			remoteInfo = "bg-picker";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXBuildFile section */
 		FBFA262430475D1900AE268D /* XMLCoder in Frameworks */ = {isa = PBXBuildFile; productRef = FBFA262330475D1900AE268D /* XMLCoder */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "bg-picker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000001 /* bg-pickerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bg-pickerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -26,6 +37,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A10000000000000000000002 /* bg-pickerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = bg-pickerTests;
+			sourceTree = "<group>";
+		};
 		FB51725C2FA5FD5D00DF0C85 /* bg-picker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -37,6 +53,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB5172572FA5FD5D00DF0C85 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -52,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				FB51725C2FA5FD5D00DF0C85 /* bg-picker */,
+				A10000000000000000000002 /* bg-pickerTests */,
 				FB51725B2FA5FD5D00DF0C85 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				FB51725A2FA5FD5D00DF0C85 /* bg-picker.app */,
+				A10000000000000000000001 /* bg-pickerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,6 +92,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A10000000000000000000008 /* bg-pickerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000000000000000000000B /* Build configuration list for PBXNativeTarget "bg-pickerTests" */;
+			buildPhases = (
+				A10000000000000000000004 /* Sources */,
+				A10000000000000000000003 /* Frameworks */,
+				A10000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000007 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000002 /* bg-pickerTests */,
+			);
+			name = bg-pickerTests;
+			packageProductDependencies = (
+			);
+			productName = bg-pickerTests;
+			productReference = A10000000000000000000001 /* bg-pickerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		FB5172592FA5FD5D00DF0C85 /* bg-picker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB5172652FA5FD5E00DF0C85 /* Build configuration list for PBXNativeTarget "bg-picker" */;
@@ -100,6 +148,10 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					A10000000000000000000008 = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = FB5172592FA5FD5D00DF0C85;
+					};
 					FB5172592FA5FD5D00DF0C85 = {
 						CreatedOnToolsVersion = 26.4.1;
 						SystemCapabilities = {
@@ -128,11 +180,19 @@
 			projectRoot = "";
 			targets = (
 				FB5172592FA5FD5D00DF0C85 /* bg-picker */,
+				A10000000000000000000008 /* bg-pickerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A10000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB5172582FA5FD5D00DF0C85 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -143,6 +203,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB5172562FA5FD5D00DF0C85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -152,7 +219,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		A10000000000000000000007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FB5172592FA5FD5D00DF0C85 /* bg-picker */;
+			targetProxy = A10000000000000000000006 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		A10000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MY_BUNDLE_ID:default=matthew.bg-picker).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bg-picker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/bg-picker";
+			};
+			name = Debug;
+		};
+		A1000000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MY_BUNDLE_ID:default=matthew.bg-picker).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bg-picker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/bg-picker";
+			};
+			name = Release;
+		};
 		FB5172632FA5FD5E00DF0C85 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = FB51725C2FA5FD5D00DF0C85 /* bg-picker */;
@@ -365,6 +482,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A1000000000000000000000B /* Build configuration list for PBXNativeTarget "bg-pickerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000009 /* Debug */,
+				A1000000000000000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FB5172552FA5FD5D00DF0C85 /* Build configuration list for PBXProject "bg-picker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

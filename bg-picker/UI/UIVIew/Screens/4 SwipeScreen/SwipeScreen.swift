@@ -1,21 +1,9 @@
-//
-//  ContentView.swift
-//  bg-picker
-//
-//  Created by Danniel on 02/05/26.
-//
-
 import SwiftUI
 
 struct SwipeScreen: View {
+    let room: any RoomSession
     let router: AppRouter
-    // Defaulted rather than required: no prop-drilling, but previews and the debug
-    // harness can still inject an isolated store.
-    @ObservedObject var store: SessionGameStore = .shared
 
-    // @StateObject, not @ObservedObject: this view owns the deck. An @ObservedObject
-    // initialised inline is re-created whenever SwiftUI re-inits the view, which
-    // silently throws away swipe progress.
     @StateObject private var viewModel = SwipeViewModel()
 
     var body: some View {
@@ -26,9 +14,7 @@ struct SwipeScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Text("Room")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                header
                     .padding(.top, 70)
 
                 Spacer(minLength: 8)
@@ -41,7 +27,7 @@ struct SwipeScreen: View {
                 Spacer(minLength: 32)
 
                 Button(action: finishSwiping) {
-                    Text("Finish")
+                    Text(room.localSwipeProgress.isFinished ? "Submitted" : "Finish")
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
                         .foregroundStyle(.black.opacity(0.85))
                         .frame(maxWidth: .infinity)
@@ -49,70 +35,84 @@ struct SwipeScreen: View {
                         .background(Color(red: 0.93, green: 0.88, blue: 0.99))
                         .clipShape(Capsule())
                 }
-                .disabled(!viewModel.canFinish)
-                .opacity(viewModel.canFinish ? 1 : 0.55)
+                .disabled(!room.canFinishSwiping)
+                .opacity(room.canFinishSwiping ? 1 : 0.55)
                 .padding(.horizontal, 34)
                 .padding(.bottom, 40)
             }
         }
         .onAppear { syncDeck() }
-        .onChange(of: store.cards) { _, _ in syncDeck() }
+        .onChange(of: room.canonicalDeck) { _, _ in syncDeck() }
+        .onChange(of: room.localSwipeProgress) { _, _ in syncDeck() }
+        .onChange(of: room.localSwipeProgress.isFinished) { _, finished in
+            if finished, !router.contains(.podium) {
+                router.push(.podium)
+            }
+        }
+    }
+
+    private var header: some View {
+        VStack(spacing: 4) {
+            Text("Game Room")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+            Text("\(room.participants.count) players • \(room.localSwipeProgress.decisions.count)/\(room.canonicalDeck.count) decided")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.7))
+        }
+        .foregroundStyle(.white)
     }
 
     @ViewBuilder
     private var content: some View {
-        switch store.state {
-        case .idle, .loading:
-            statusView {
-                ProgressView()
-                    .tint(.white)
-                    .scaleEffect(1.4)
-                Text("Loading games from the geeklist…")
-            }
-
-        case .failed(let message):
+        if let message = room.sessionError {
             statusView {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 40))
                     .foregroundStyle(.red.opacity(0.9))
                 Text(message)
             }
-
-        case .loaded where store.cards.isEmpty:
+        } else if room.gamePhase != .started || room.canonicalDeck.isEmpty {
             statusView {
-                Image(systemName: "tray")
-                    .font(.system(size: 40))
-                Text("That geeklist has no board games in it.")
+                ProgressView().tint(.white).scaleEffect(1.4)
+                Text("Synchronizing the room’s game deck…")
             }
-
-        case .loaded:
-            SwipeableCardsView(swipeableViewModel: viewModel) { _ in
-                finishSwiping()
+        } else if room.localSwipeProgress.isFinished {
+            statusView {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 44))
+                Text("Your choices are submitted and cannot be changed.")
+            }
+        } else {
+            SwipeableCardsView(swipeableViewModel: viewModel) { gameID, direction in
+                room.recordDecision(gameID: gameID, accepted: direction == .right)
             }
         }
     }
 
     private func statusView<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(spacing: 16) {
-            content()
-        }
-        .font(.system(size: 16, weight: .medium))
-        .foregroundStyle(.white.opacity(0.85))
-        .multilineTextAlignment(.center)
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 16) { content() }
+            .font(.system(size: 16, weight: .medium))
+            .foregroundStyle(.white.opacity(0.85))
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func syncDeck() {
-        viewModel.setCards(store.cards)
+        viewModel.setSession(cards: room.canonicalDeck, progress: room.localSwipeProgress)
     }
 
     private func finishSwiping() {
-        guard viewModel.canFinish else { return }
-        router.push(.podium)
+        guard room.canFinishSwiping else { return }
+        room.finishSwiping()
+        if room.localSwipeProgress.isFinished, !router.contains(.podium) {
+            router.push(.podium)
+        }
     }
 }
 
+#if DEBUG
 #Preview {
-    SwipeScreen(router: AppRouter(), store: SessionGameStore())
+    SwipeScreen(room: PreviewRoomSession.started, router: AppRouter())
 }
+#endif

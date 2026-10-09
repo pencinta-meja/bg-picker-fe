@@ -28,6 +28,10 @@ final class AppRouter {
 
     var isAtLobby: Bool { path.isEmpty }
 
+    func contains(_ route: Route) -> Bool {
+        path.contains(route)
+    }
+
     /// Hand this to `NavigationStack`; SwiftUI's writes then land in `update(to:)` too.
     var pathBinding: Binding<[Route]> {
         Binding(

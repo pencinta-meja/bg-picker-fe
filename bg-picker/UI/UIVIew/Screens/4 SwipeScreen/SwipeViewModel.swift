@@ -1,54 +1,42 @@
-//
-//  SwipeableViewModel.swift
-//  bg-picker
-//
-//  Created by Danniel on 06/05/26.
-//
-import SwiftUI
 import Combine
+import SwiftUI
 
 final class SwipeViewModel: ObservableObject {
-    private var originalCards: [BoardGameCard]
-    @Published var unswipedCards: [BoardGameCard]
-    @Published var swipedCards: [BoardGameCard]
+    private var originalCards: [BoardGameCard] = []
+    @Published var unswipedCards: [BoardGameCard] = []
+    @Published var swipedCards: [BoardGameCard] = []
 
-    var canFinish: Bool {
-        !swipedCards.isEmpty && unswipedCards.isEmpty
-    }
+    var canFinish: Bool { !originalCards.isEmpty && unswipedCards.isEmpty }
 
     init(cards: [BoardGameCard] = []) {
-        self.originalCards = cards
-        self.unswipedCards = cards.shuffled()
-        self.swipedCards = []
+        setSession(cards: cards, progress: RoomSwipeProgress())
     }
 
-    /// Cards arrive asynchronously once the geeklist finishes loading.
-    ///
-    /// Deliberately a no-op when the deck is unchanged, so re-rendering the screen
-    /// does not reshuffle a deck the player is partway through.
-    func setCards(_ cards: [BoardGameCard]) {
-        guard originalCards.map(\.id) != cards.map(\.id) else { return }
+    /// Applies the host's canonical order and restores the replicated local checkpoint.
+    func setSession(cards: [BoardGameCard], progress: RoomSwipeProgress) {
+        let expectedUnswipedIDs = cards.filter { progress.decisions[$0.id] == nil }.map(\.id)
+        let expectedSwipedIDs = cards.filter { progress.decisions[$0.id] != nil }.map(\.id)
+        guard originalCards.map(\.id) != cards.map(\.id)
+                || unswipedCards.map(\.id) != expectedUnswipedIDs
+                || swipedCards.map(\.id) != expectedSwipedIDs else { return }
+
         originalCards = cards
-        unswipedCards = cards.shuffled()
-        swipedCards = []
+        swipedCards = cards.compactMap { card in
+            guard let decision = progress.decisions[card.id] else { return nil }
+            var restored = card
+            restored.swipeDirection = decision == .accepted ? .right : .left
+            return restored
+        }
+        unswipedCards = cards.filter { progress.decisions[$0.id] == nil }
     }
 
     func removeTopCard() {
-        if !unswipedCards.isEmpty {
-            guard let card = unswipedCards.first else { return }
-            unswipedCards.removeFirst()
-            swipedCards.append(card)
-        }
+        guard !unswipedCards.isEmpty else { return }
+        swipedCards.append(unswipedCards.removeFirst())
     }
-    
+
     func updateTopCardSwipeDirection(_ direction: BoardGameCard.SwipeDirection) {
-        if !unswipedCards.isEmpty {
-            unswipedCards[0].swipeDirection = direction
-        }
-    }
-    
-    func reset() {
-        unswipedCards = originalCards.shuffled()
-        swipedCards = []
+        guard !unswipedCards.isEmpty else { return }
+        unswipedCards[0].swipeDirection = direction
     }
 }

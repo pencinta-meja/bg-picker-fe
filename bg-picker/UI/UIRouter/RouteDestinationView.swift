@@ -24,9 +24,9 @@ struct RouteDestinationView: View {
         case .categoryPreference:
             PreferenceScreen(room: room, router: router)
         case .swiping:
-            SwipeScreen(router: router)
+            SwipeScreen(room: room, router: router)
         case .podium:
-            PodiumScreen()
+            PodiumScreen(room: room)
         }
     }
 }
